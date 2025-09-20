@@ -1,80 +1,100 @@
+# docker-compose.yml
 version: "3.8"
 
 services:
   namenode:
-    image: apache/hadoop:3
-    platform: linux/amd64
-    hostname: namenode
-    networks:
-      - hadoop-net
-    volumes:
-      - ./Makefile:/opt/hadoop/Makefile
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
     ports:
-      - "9870:9870"
-    env_file:
-      - ./config
+      - "9870:9870" # NameNode Web UI
+      - "9000:9000" # FS Default
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
     environment:
-      CORE_SITE_XML_fs_defaultFS: "hdfs://namenode"
-      CORE_SITE_XML_fs_default_name: "hdfs://namenode"
-      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
-      HDFS_SITE_XML_dfs_webhdfs_enabled: "true"
-    command: ["hdfs", "namenode"]
-
-  datanode_1:
-    image: apache/hadoop:3
-    platform: linux/amd64
-    networks:
-      - hadoop-net
-    command: ["hdfs", "datanode"]
+      - CLUSTER_NAME=test
     env_file:
-      - ./config
+      - ./hadoop.env
+    networks:
+      - hadoop
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1
+    restart: always
     depends_on:
       - namenode
-
-  datanode_2:
-    image: apache/hadoop:3
-    platform: linux/amd64
-    networks:
-      - hadoop-net
-    command: ["hdfs", "datanode"]
+    volumes:
+      - hadoop_datanode1:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
     env_file:
-      - ./config
+      - ./hadoop.env
+    networks:
+      - hadoop
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    restart: always
     depends_on:
       - namenode
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+    networks:
+      - hadoop
 
   resourcemanager:
-    image: apache/hadoop:3
-    platform: linux/amd64
-    hostname: resourcemanager
-    networks:
-      - hadoop-net
-    command: ["yarn", "resourcemanager"]
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: always
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
     ports:
-      - "8088:8088"
+      - "8088:8088" # ResourceManager Web UI
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode1:9864 datanode2:9864"
     env_file:
-      - ./config
-    volumes:
-      - ./test.sh:/opt/test.sh
-
-  nodemanager:
-    image: apache/hadoop:3
-    platform: linux/amd64
+      - ./hadoop.env
     networks:
-      - hadoop-net
-    command: ["yarn", "nodemanager"]
-    env_file:
-      - ./config
+      - hadoop
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager1
+    restart: always
     depends_on:
       - resourcemanager
-
-  firefox:
-    image: jlesage/firefox
-    platform: linux/amd64
-    hostname: firefox
+    environment:
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+    env_file:
+      - ./hadoop.env
     networks:
-      - hadoop-net
-    ports:
-      - "5800:5800"
+      - hadoop
+
+  nodemanager2:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager2
+    restart: always
+    depends_on:
+      - resourcemanager
+    environment:
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+    env_file:
+      - ./hadoop.env
+    networks:
+      - hadoop
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode1:
+  hadoop_datanode2:
 
 networks:
-  hadoop-net:
+  hadoop:
