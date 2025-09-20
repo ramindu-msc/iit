@@ -14,7 +14,3 @@ cd /home/gcpuser/
 sudo mkdir -p wso2carbon-logs
 sudo chown -R 1000:1000 wso2carbon-logs
 sudo chmod -R 777 wso2carbon-logs
-sudo cp /home/gcpuser/dockerizedAndCodes/apim/limits.conf /etc/security/limits.conf
-sudo cp /home/gcpuser/dockerizedAndCodes/apim/sysctl.conf /etc/sysctl.conf
-#touch carbon.log
-#sudo docker pull ramilu90/wso2si:4.2.0
