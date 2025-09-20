@@ -1,0 +1,51 @@
+version: "2"
+services:
+  namenode:
+    image: apache/hadoop:3
+    platform: linux/amd64
+    hostname: namenode
+    volumes:
+      - ./Makefile:/opt/hadoop/Makefile
+    ports:
+      - 9870:9870
+    env_file:
+      - ./config
+    environment:
+      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      HDFS_SITE_XML_dfs.webhdfs.enabled: "true"
+    command: ["hdfs", "namenode"]
+  datanode_1:
+    image: apache/hadoop:3
+    platform: linux/amd64
+    command: [ "hdfs", "datanode" ]
+    env_file:
+      - ./config
+  datanode_2:
+    image: apache/hadoop:3
+    platform: linux/amd64
+    command: [ "hdfs", "datanode" ]
+    env_file:
+      - ./config
+  resourcemanager:
+    image: apache/hadoop:3
+    platform: linux/amd64
+    hostname: resourcemanager
+    command: [ "yarn", "resourcemanager" ]
+    ports:
+      - 8088:8088
+    env_file:
+      - ./config
+    volumes:
+      - ./test.sh:/opt/test.sh
+  nodemanager:
+    image: apache/hadoop:3
+    platform: linux/amd64
+    command: [ "yarn", "nodemanager" ]
+    env_file:
+      - ./config
+  firefox:
+    image: jlesage/firefox
+    platform: linux/amd64
+    hostname: firefox
+    ports:
+      - 5800:5800
