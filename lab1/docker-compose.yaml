@@ -14,8 +14,9 @@ services:
     env_file:
       - ./config
     environment:
+      CORE_SITE_XML_fs_defaultFS: "hdfs://namenode"
+      CORE_SITE_XML_fs_default_name: "hdfs://namenode"
       ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
-      # Corrected variable name ('.' replaced with '_')
       HDFS_SITE_XML_dfs_webhdfs_enabled: "true"
     command: ["hdfs", "namenode"]
 
