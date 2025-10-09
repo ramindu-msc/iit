@@ -1,0 +1,17 @@
+version: '3'
+services:
+  cassandra_node1:
+    image: cassandra:4.0.12
+    hostname: cassandra
+    container_name: cassandra_node1
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+    environment:
+      - CASSANDRA_SEEDS=cassandra_node1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra_node1
+    networks:
+      - local
+networks:
+  local:
+    driver: bridge
