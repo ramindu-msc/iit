@@ -6,7 +6,6 @@ services:
     container_name: cassandra
     extra_hosts:
       - "region1:34.173.176.232"
-      - "region2:34.45.179.107"
     ports:
       - "9042:9042"
       - "7000:7000"
