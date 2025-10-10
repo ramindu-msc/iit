@@ -13,7 +13,7 @@ services:
     environment:
       - CASSANDRA_RPC_ADDRESS=0.0.0.0 #IP address that Cassandra uses to listen for client connections. Clients (like an application using a Cassandra driver)
       #      - CASSANDRA_LISTEN_ADDRESS=region2.internal #It should be an IP address that is reachable by all other nodes within the cluster.
-      - CASSANDRA_SEEDS=region1 #A new node contacts one of the seed nodes to learn about the topology of the entire cluster. Seed nodes are not special once the cluster is running, but they are crucial for a new node to join the cluster
+      - CASSANDRA_SEEDS=region1,region2 #A new node contacts one of the seed nodes to learn about the topology of the entire cluster. Seed nodes are not special once the cluster is running, but they are crucial for a new node to join the cluster
       - CASSANDRA_BROADCAST_ADDRESS=region2 #This is the IP address that a Cassandra node advertises to other nodes in the cluster. Other nodes use this address to connect to this node for gossip and data exchange
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       # Performance optimizations
