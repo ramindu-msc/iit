@@ -11,6 +11,7 @@ services:
       - "9000:9000" # FS Default
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
+      - /home/iitgcpuser/iit/iit-bda-content/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
     environment:
       - CLUSTER_NAME=test
     env_file:
