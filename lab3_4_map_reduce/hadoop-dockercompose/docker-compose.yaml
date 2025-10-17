@@ -7,7 +7,7 @@ services:
     container_name: namenode
     volumes:
       - ./Makefile:/opt/hadoop/Makefile
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/resources:/opt/hadoop/resources
+      - /home/iitgcpuser/iit/iit-bda-content/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
     ports:
       - 9870:9870
     env_file:
