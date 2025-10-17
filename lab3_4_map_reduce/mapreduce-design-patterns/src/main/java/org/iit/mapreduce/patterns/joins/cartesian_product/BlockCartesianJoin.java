@@ -38,7 +38,7 @@ public class BlockCartesianJoin {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             for (String recordB : blockB) {
-                context.write(Null, new Text(recordB + value)); // Cartesian product for each block pair
+                context.write(null, new Text(recordB + value)); // Cartesian product for each block pair
             }
         }
     }
