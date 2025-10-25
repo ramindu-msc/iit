@@ -30,8 +30,9 @@ public class ProductBinning {
             String category = fields[2];  // Assume category is given, e.g., Electronics, Clothing, Groceries.
 
             // Write each record to the appropriate bin file based on category
-            if (category.equals("Electronics")) {
+            if (category.equals("household")) {
                 multipleOutputs.write("Electronics", productId, value, "Electronics/part");
+                multipleOutputs.write("Clothing", productId, value, "Clothing/part");
             } else if (category.equals("Clothing")) {
                 multipleOutputs.write("Clothing", productId, value, "Clothing/part");
             } else if (category.equals("Groceries")) {
