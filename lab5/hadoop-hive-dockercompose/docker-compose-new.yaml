@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   #########################################
-  # 1. Hive Metastore Database (Official Image)
+  # 1. Hive Metastore Database (PostgreSQL)
   #########################################
   postgres-metastore:
-    image: postgres:16 # <-- OFFICIAL IMAGE, amd64 compatible
+    image: postgres:16
     container_name: postgres-metastore
     environment:
       - POSTGRES_USER=hive
@@ -22,7 +22,7 @@ services:
   # 2. Hadoop Cluster (Bitnami Image)
   #########################################
   hadoop:
-    image: bitnami/hadoop:3.3.6 # <-- VENDOR IMAGE, amd64 compatible
+    image: bitnami/hadoop:3.3.6
     container_name: hadoop
     environment:
       - HADOOP_DEFAULTS_HDFS_ENABLE=true
@@ -40,34 +40,30 @@ services:
   # 3. Hive Services (Bitnami Images)
   #########################################
   hive-metastore:
-    image: bitnami/hive:3.1.3 # <-- VENDOR IMAGE, amd64 compatible
+    image: bitnami/hive:3.1.3
     container_name: hive-metastore
     depends_on:
       - postgres-metastore
       - hadoop
     environment:
       - HIVE_ROLE=metastore
-      # Postgres Metastore Config
       - HIVE_METASTORE_DATABASE_HOST=postgres-metastore
       - HIVE_METASTORE_DATABASE_NAME=metastore
       - HIVE_METASTORE_DATABASE_USER=hive
       - HIVE_METASTORE_DATABASE_PASSWORD=hive
-      # Link to Hadoop
       - HADOOP_HOST=hadoop
     networks:
       - hadoop-hive-net
 
-  hive-server:
-    image: bitnami/hive:3.1.3 # <-- VENDOR IMAGE, amd64 compatible
+  hive--server:
+    image: bitnami/hive:3.1.3
     container_name: hive-server
     depends_on:
       - hive-metastore
       - hadoop
     environment:
       - HIVE_ROLE=hiveserver2
-      # Link to the Metastore service
       - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
-      # Link to Hadoop
       - HADOOP_HOST=hadoop
     ports:
       - "10000:10000" # HiveServer2 Thrift port
