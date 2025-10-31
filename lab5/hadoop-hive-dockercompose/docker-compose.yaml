@@ -105,7 +105,7 @@ services:
       - hadoop
 
   hive-metastore:
-    image: bde2020/hive-metastore-postgresql:2.3.0
+    image: bde2020/hive:2.3.2-postgresql-metastore
     # <-- This is the correct image
     container_name: hive-metastore
     restart: always
