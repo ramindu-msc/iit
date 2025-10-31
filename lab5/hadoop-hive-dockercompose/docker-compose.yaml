@@ -105,7 +105,7 @@ services:
       - hadoop
 
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bde2020/hive-metastore:2.3.2-hadoop3.2.1
     container_name: hive-metastore
     restart: always
     depends_on:
