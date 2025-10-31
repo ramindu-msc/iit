@@ -127,7 +127,7 @@ services:
       - hadoop
 
   hive-server:
-    image: bbde2020/hive:2.3.2
+    image: bde2020/hive:2.3.2
     container_name: hive-server
     restart: always
     depends_on:
