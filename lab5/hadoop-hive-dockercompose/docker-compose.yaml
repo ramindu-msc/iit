@@ -29,7 +29,7 @@ services:
     # image: bde2020/hive:2.1.0-postgresql-metastore
 
     # NEW IMAGE (This tag includes Hadoop 2.8):
-    image: bde2020/hive:2.1.0-hadoop2.8
+    image: bde2020/hive:2.1.0-hadoop2.8-java8
     platform: linux/amd64
     volumes:
       - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
