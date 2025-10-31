@@ -105,7 +105,8 @@ services:
       - hadoop
 
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    # 1. FIXED IMAGE: Use the dedicated metastore image
+    image: bde2020/hive-metastore:2.3.2-hadoop3.2.1
     container_name: hive-metastore
     restart: always
     depends_on:
@@ -127,7 +128,8 @@ services:
       - hadoop
 
   hive-server:
-    image: bde2020/hive:2.3.2
+    # 1. FIXED IMAGE: Use the image tagged for Hadoop 3.2.1
+    image: bde2020/hive:2.3.2-hadoop3.2.1
     container_name: hive-server
     restart: always
     depends_on:
@@ -137,12 +139,11 @@ services:
       - "10000:10000" # HiveServer2 Thrift port (for Beeline/JDBC)
       - "10002:10002" # HiveServer2 Web UI
     environment:
-      # 1. CHANGED: Wait for Postgres & Hadoop, NOT the metastore
+      # 2. FIXED PRECONDITION: Wait for Postgres, not the metastore
       SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000 resourcemanager:8088"
       HIVE_CONF_hive_metastore_uris: "thrift://hive-metastore:9083"
 
-      # 2. ADDED: Give hive-server the DB credentials
-      # This allows it to run 'schematool' and initialize the database
+      # 3. ADDED: Give hive-server the DB credentials to run schematool
       HIVE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-postgres:5432/metastore"
       HIVE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
       HIVE_CONF_javax_jdo_option_ConnectionUserName: "hive"
