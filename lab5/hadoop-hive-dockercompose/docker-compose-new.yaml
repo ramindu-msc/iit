@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   #########################################
-  # 1. Hive Metastore Database (PostgreSQL)
+  # 1. Hive Metastore Database (Official Image)
   #########################################
   postgres-metastore:
-    image: postgres:12
+    image: postgres:16 # <-- OFFICIAL IMAGE, amd64 compatible
     container_name: postgres-metastore
     environment:
       - POSTGRES_USER=hive
@@ -19,16 +19,14 @@ services:
       - hadoop-hive-net
 
   #########################################
-  # 2. Hadoop Cluster (All-in-one)
+  # 2. Hadoop Cluster (Bitnami Image)
   #########################################
   hadoop:
-    image: bitnami/hadoop:3.3.6
+    image: bitnami/hadoop:3.3.6 # <-- VENDOR IMAGE, amd64 compatible
     container_name: hadoop
     environment:
-      # Enable HDFS and YARN
       - HADOOP_DEFAULTS_HDFS_ENABLE=true
       - HADOOP_DEFAULTS_YARN_ENABLE=true
-      # Format HDFS on first run
       - HADOOP_HDFS_FORMAT=true
     ports:
       - "9870:9870"  # NameNode Web UI
@@ -39,10 +37,10 @@ services:
       - hadoop-hive-net
 
   #########################################
-  # 3. Hive Services (using Bitnami images)
+  # 3. Hive Services (Bitnami Images)
   #########################################
   hive-metastore:
-    image: bitnami/hive:3.1.3
+    image: bitnami/hive:3.1.3 # <-- VENDOR IMAGE, amd64 compatible
     container_name: hive-metastore
     depends_on:
       - postgres-metastore
@@ -60,7 +58,7 @@ services:
       - hadoop-hive-net
 
   hive-server:
-    image: bitnami/hive:3.1.3
+    image: bitnami/hive:3.1.3 # <-- VENDOR IMAGE, amd64 compatible
     container_name: hive-server
     depends_on:
       - hive-metastore
