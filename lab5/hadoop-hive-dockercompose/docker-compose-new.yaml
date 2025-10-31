@@ -14,103 +14,63 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./data/postgres/metastore_db:/var/lib/postgresql/data
+      - metastore-db-data:/var/lib/postgresql/data
     networks:
       - hadoop-hive-net
 
   #########################################
-  # 2. Hadoop Cluster (HDFS + YARN)
+  # 2. Hadoop Cluster (All-in-one)
   #########################################
-  namenode:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hadoop-namenode:hadoop3.3.4-java8
-    container_name: namenode
+  hadoop:
+    image: bitnami/hadoop:3.3.6
+    container_name: hadoop
     environment:
-      - CLUSTER_NAME=hadoop-cluster
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      # Enable HDFS and YARN
+      - HADOOP_DEFAULTS_HDFS_ENABLE=true
+      - HADOOP_DEFAULTS_YARN_ENABLE=true
+      # Format HDFS on first run
+      - HADOOP_HDFS_FORMAT=true
     ports:
       - "9870:9870"  # NameNode Web UI
-      - "9000:9000"  # HDFS Port
-    volumes:
-      - ./data/hadoop/namenode:/hadoop/dfs/name
-    networks:
-      - hadoop-hive-net
-
-  datanode:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hadoop-datanode:hadoop3.3.4-java8
-    container_name: datanode
-    depends_on:
-      - namenode
-    environment:
-      - SERVICE_PRECONDITION=namenode:9870
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    volumes:
-      - ./data/hadoop/datanode:/hadoop/dfs/data
-    networks:
-      - hadoop-hive-net
-
-  resourcemanager:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hadoop-resourcemanager:hadoop3.3.4-java8
-    container_name: resourcemanager
-    depends_on:
-      - namenode
-      - datanode
-    environment:
-      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    ports:
       - "8088:8088"  # YARN Web UI
-    networks:
-      - hadoop-hive-net
-
-  nodemanager:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hadoop-nodemanager:hadoop3.3.4-java8
-    container_name: nodemanager
-    depends_on:
-      - namenode
-      - datanode
-      - resourcemanager
-    environment:
-      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    volumes:
+      - hadoop-data:/opt/bitnami/hadoop/data
     networks:
       - hadoop-hive-net
 
   #########################################
-  # 3. Hive Services
+  # 3. Hive Services (using Bitnami images)
   #########################################
   hive-metastore:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hive-metastore:hive3.1.3-java8
+    image: bitnami/hive:3.1.3
     container_name: hive-metastore
     depends_on:
-      - namenode
       - postgres-metastore
+      - hadoop
     environment:
-      - SERVICE_PRECONDITION=namenode:9870 postgres-metastore:5432
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - METASTORE_DB_HOSTNAME=postgres-metastore
-      - METASTORE_DB_NAME=metastore
-      - METASTORE_DB_USER=hive
-      - METASTORE_DB_PASSWORD=hive
+      - HIVE_ROLE=metastore
+      # Postgres Metastore Config
+      - HIVE_METASTORE_DATABASE_HOST=postgres-metastore
+      - HIVE_METASTORE_DATABASE_NAME=metastore
+      - HIVE_METASTORE_DATABASE_USER=hive
+      - HIVE_METASTORE_DATABASE_PASSWORD=hive
+      # Link to Hadoop
+      - HADOOP_HOST=hadoop
     networks:
       - hadoop-hive-net
 
   hive-server:
-    # UPDATED TAG: Removed '2.0.0-' prefix
-    image: bde2020/hive-server:hive3.1.3-java8
+    image: bitnami/hive:3.1.3
     container_name: hive-server
     depends_on:
-      - namenode
       - hive-metastore
-      - resourcemanager
+      - hadoop
     environment:
-      - SERVICE_PRECONDITION=namenode:9870 hive-metastore:9083 resourcemanager:8088
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HIVE_ROLE=hiveserver2
+      # Link to the Metastore service
       - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
+      # Link to Hadoop
+      - HADOOP_HOST=hadoop
     ports:
       - "10000:10000" # HiveServer2 Thrift port
       - "10002:10002" # HiveServer2 Web UI
@@ -118,7 +78,8 @@ services:
       - hadoop-hive-net
 
 volumes:
-  data:
+  metastore-db-data:
+  hadoop-data:
 
 networks:
   hadoop-hive-net:
