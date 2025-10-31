@@ -25,26 +25,28 @@ services:
     ports:
       - 50075:50075
   hive-server:
-    # UPDATED IMAGE:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    # 1. IMAGE CHANGE: Use the notebook image which has all clients
+    image: bde2020/spark-notebook:2.1.0-hadoop2.8-hive
     platform: linux/amd64
     volumes:
       - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     container_name: hive-server
     env_file:
       - ./hadoop-hive.env
-    # REMOVE THIS ENTIRE 'environment' BLOCK:
-    # environment:
-    #   - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
+    # 2. REMOVE the 'environment:' block if you have it
+
+    # 3. COMMAND OVERRIDE:
+    #    - 'sleep 30' fixes the 'Connection refused' race condition
+    #    - '/opt/hive/bin/hive --service hiveserver2' starts the correct service
+    command: /bin/bash -c "sleep 30 && /opt/hive/bin/hive --service hiveserver2"
     ports:
       - "10000:10000"
-    # ADD/KEEP depends_on:
     depends_on:
       - hive-metastore
       - namenode
       - datanode
   hive-metastore:
-    # UPDATED IMAGE:
+    # Use the 2.3.2 image for the metastore service
     image: bde2020/hive:2.3.2-postgresql-metastore
     platform: linux/amd64
     container_name: hive-metastore
@@ -54,7 +56,7 @@ services:
     depends_on:
       - hive-metastore-postgresql
   hive-metastore-postgresql:
-    # UPDATED IMAGE:
+    # Use the 2.3.0 image for the database
     image: bde2020/hive-metastore-postgresql:2.3.0
     platform: linux/amd64
   spark-master:
