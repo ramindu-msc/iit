@@ -105,7 +105,7 @@ services:
       - hadoop
 
   hive-metastore:
-    image: bde2020/hive-metastore:2.3.2-hadoop3.2.1
+    image: bde2020/hive-metastore:2.3.2 # <-- This is the correct image
     container_name: hive-metastore
     restart: always
     depends_on:
@@ -117,6 +117,7 @@ services:
       - "9083:9083" # Metastore Thrift port
     environment:
       SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000 namenode:9870"
+      # These credentials are for this service to run schematool
       HIVE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-postgres:5432/metastore"
       HIVE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
       HIVE_CONF_javax_jdo_option_ConnectionUserName: "hive"
@@ -137,9 +138,10 @@ services:
       - "10000:10000" # HiveServer2 Thrift port (for Beeline/JDBC)
       - "10002:10002" # HiveServer2 Web UI
     environment:
-      # NOW WE WAIT FOR THE METASTORE, since it's handling the DB
+      # This service waits for the metastore, which is now starting correctly
       SERVICE_PRECONDITION: "hive-metastore:9083"
       HIVE_CONF_hive_metastore_uris: "thrift://hive-metastore:9083"
+      # NO database credentials here. This breaks the race condition.
     env_file:
       - ./hadoop.env
     networks:
