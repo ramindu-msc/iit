@@ -25,35 +25,37 @@ services:
     ports:
       - 50075:50075
   hive-server:
-    # OLD IMAGE:
-    # image: bde2020/hive:2.1.0-postgresql-metastore
-
-    # NEW IMAGE (This tag includes Hadoop 2.8):
-    image: bde2020/hive:2.1.0-hadoop2.8-java8
+    # UPDATED IMAGE:
+    image: bde2020/hive:2.3.2-postgresql-metastore
     platform: linux/amd64
     volumes:
       - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     container_name: hive-server
     env_file:
       - ./hadoop-hive.env
-    environment:
-      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
+    # REMOVE THIS ENTIRE 'environment' BLOCK:
+    # environment:
+    #   - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
     ports:
       - "10000:10000"
-    # ADD DEPENDENCIES:
+    # ADD/KEEP depends_on:
     depends_on:
       - hive-metastore
       - namenode
       - datanode
   hive-metastore:
-    image: bde2020/hive:2.1.0-postgresql-metastore
+    # UPDATED IMAGE:
+    image: bde2020/hive:2.3.2-postgresql-metastore
     platform: linux/amd64
     container_name: hive-metastore
     env_file:
       - ./hadoop-hive.env
     command: /opt/hive/bin/hive --service metastore
+    depends_on:
+      - hive-metastore-postgresql
   hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.1.0
+    # UPDATED IMAGE:
+    image: bde2020/hive-metastore-postgresql:2.3.0
     platform: linux/amd64
   spark-master:
     image: bde2020/spark-master:2.1.0-hadoop2.8-hive-java8
