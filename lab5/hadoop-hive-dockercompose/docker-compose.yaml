@@ -91,18 +91,18 @@ services:
       - ./hadoop.env
     networks:
       - hadoop
-hive-postgres:
-  image: postgres:9.6
-  container_name: hive-postgres
-  restart: always
-  volumes:
-    - hive_postgres_data:/var/lib/postgresql/data
-  environment:
-    - POSTGRES_USER=hive
-    - POSTGRES_PASSWORD=hive
-    - POSTGRES_DB=metastore
-  networks:
-    - hadoop
+  hive-postgres:
+    image: postgres:9.6
+    container_name: hive-postgres
+    restart: always
+    volumes:
+      - hive_postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hive
+      - POSTGRES_PASSWORD=hive
+      - POSTGRES_DB=metastore
+    networks:
+      - hadoop
 
   hive-metastore:
     image: bde2020/hive-metastore:2.3.2-hadoop3.2.1
