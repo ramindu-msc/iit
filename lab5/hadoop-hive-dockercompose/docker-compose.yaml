@@ -1,90 +1,89 @@
-# 'version' attribute is removed to fix the warning
+version: '3.8'
+
 services:
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
-    platform: linux/amd64  # <-- ADDED THIS LINE
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.1-java8
     container_name: namenode
-    hostname: namenode
-    restart: always
+    platform: linux/amd64
+    volumes:
+      -./data/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      -./hadoop-hive.env
     ports:
       - "9870:9870"
       - "9000:9000"
-    volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
-      - namenode-data:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
-      - HDFS_CONF_dfs_replication=1
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    networks:
-      - hive-net
 
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
-    platform: linux/amd64  # <-- ADDED THIS LINE
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.1-java8
     container_name: datanode
-    hostname: datanode
-    restart: always
+    platform: linux/amd64
     depends_on:
       - namenode
     volumes:
-      - datanode-data:/hadoop/dfs/data
-    environment:
-      - SERVICE_PRECONDITION=namenode:9870
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - HDFS_CONF_dfs_datanode_address=0.0.0.0:9866
-      - HDFS_CONF_dfs_datanode_http_address=0.0.0.0:9864
-      - HDFS_CONF_dfs_datanode_ipc_address=0.0.0.0:9867
-    networks:
-      - hive-net
+      -./data/datanode:/hadoop/dfs/data
+    env_file:
+      -./hadoop-hive.env
+    ports:
+      - "9864:9864"
 
-  hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.3.2
-    platform: linux/amd64  # <-- ADDED THIS LINE
-    container_name: hive-metastore-postgresql
-    hostname: hive-metastore-postgresql
-    restart: always
-    volumes:
-      - metastore-db-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=hive
-      - POSTGRES_PASSWORD=hive
-      - POSTGRES_DB=metastore
-    networks:
-      - hive-net
-
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    platform: linux/amd64  # <-- ADDED THIS LINE
-    container_name: hive-server
-    hostname: hive-server
-    restart: always
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop2.7.1-java8
+    container_name: resourcemanager
+    platform: linux/amd64
     depends_on:
       - namenode
       - datanode
-      - hive-metastore-postgresql
+    env_file:
+      -./hadoop-hive.env
+    ports:
+      - "8088:8088"
+
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop2.7.1-java8
+    container_name: nodemanager
+    platform: linux/amd64
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+    env_file:
+      -./hadoop-hive.env
+
+  hive-server:
+    image: bde2020/hive:2.3.2-spark-2.2.0
+    container_name: hive-server
+    platform: linux/amd64
+    depends_on:
+      - hive-metastore
+      - resourcemanager
+    env_file:
+      -./hadoop-hive.env
+    environment:
+      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql/metastore"
+      - "SERVICE_PRECONDITION=hive-metastore:9083"
     ports:
       - "10000:10000"
       - "10002:10002"
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-spark-2.2.0
+    container_name: hive-metastore
+    platform: linux/amd64
+    depends_on:
+      - hive-metastore-postgresql
+    env_file:
+      -./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    ports:
+      - "9083:9083"
+
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore-postgresql
+    platform: linux/amd64
     volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
-    environment:
-      - HADOOP_USER_NAME=hive
-      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - METASTORE_DB_TYPE=postgres
-      - METASTORE_DB_HOSTNAME=hive-metastore-postgresql
-      - METASTORE_DB_USER=hive
-      - METASTORE_DB_PASSWORD=hive
-      - METASTORE_DB_NAME=metastore
-    networks:
-      - hive-net
-
-networks:
-  hive-net:
-    driver: bridge
-
-volumes:
-  namenode-data:
-  datanode-data:
-  metastore-db-data:
+      -./data/metastore_db:/var/lib/postgresql/data
+    env_file:
+      -./hadoop-hive.env
