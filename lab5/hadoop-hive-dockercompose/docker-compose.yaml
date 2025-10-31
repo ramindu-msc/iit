@@ -127,6 +127,7 @@ services:
       - ./hadoop.env
     networks:
       - hadoop
+    command: /opt/hive/bin/hive --service metastore
 
   hive-server:
     image: bde2020/hive:2.3.2
