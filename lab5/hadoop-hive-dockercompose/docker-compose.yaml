@@ -25,7 +25,11 @@ services:
     ports:
       - 50075:50075
   hive-server:
-    image: bde2020/hive:2.1.0-postgresql-metastore
+    # OLD IMAGE:
+    # image: bde2020/hive:2.1.0-postgresql-metastore
+
+    # NEW IMAGE (This tag includes Hadoop 2.8):
+    image: bde2020/hive:2.1.0-hadoop2.8
     platform: linux/amd64
     volumes:
       - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
@@ -36,6 +40,11 @@ services:
       - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
     ports:
       - "10000:10000"
+    # ADD DEPENDENCIES:
+    depends_on:
+      - hive-metastore
+      - namenode
+      - datanode
   hive-metastore:
     image: bde2020/hive:2.1.0-postgresql-metastore
     platform: linux/amd64
