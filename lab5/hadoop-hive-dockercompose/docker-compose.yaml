@@ -137,8 +137,16 @@ services:
       - "10000:10000" # HiveServer2 Thrift port (for Beeline/JDBC)
       - "10002:10002" # HiveServer2 Web UI
     environment:
-      SERVICE_PRECONDITION: "hive-metastore:9083"
+      # 1. CHANGED: Wait for Postgres & Hadoop, NOT the metastore
+      SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000 resourcemanager:8088"
       HIVE_CONF_hive_metastore_uris: "thrift://hive-metastore:9083"
+
+      # 2. ADDED: Give hive-server the DB credentials
+      # This allows it to run 'schematool' and initialize the database
+      HIVE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-postgres:5432/metastore"
+      HIVE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
+      HIVE_CONF_javax_jdo_option_ConnectionUserName: "hive"
+      HIVE_CONF_javax_jdo_option_ConnectionPassword: "hive"
     env_file:
       - ./hadoop.env
     networks:
