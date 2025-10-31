@@ -116,7 +116,7 @@ services:
     ports:
       - "9083:9083" # Metastore Thrift port
     environment:
-      SERVICE_PRECONDITION: "hive-postgres:5432"
+      SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000 namenode:9870"
       HIVE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-postgres:5432/metastore"
       HIVE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
       HIVE_CONF_javax_jdo_option_ConnectionUserName: "hive"
