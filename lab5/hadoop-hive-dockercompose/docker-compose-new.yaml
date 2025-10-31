@@ -1,114 +1,118 @@
+version: '3.8'
+
 services:
-  namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
-    container_name: namenode
-    hostname: namenode
-    restart: always
-    ports:
-      - "9870:9870"
-      - "9000:9000"
-    volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
-      - namenode-data:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
-      - HDFS_CONF_dfs_replication=1
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    networks:
-      - hive-net
-
-  datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
-    container_name: datanode
-    hostname: datanode
-    restart: always
-    depends_on:
-      - namenode
-    volumes:
-      - datanode-data:/hadoop/dfs/data
-    environment:
-      - SERVICE_PRECONDITION=namenode:9870
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - HDFS_CONF_dfs_datanode_address=0.0.0.0:9866
-      - HDFS_CONF_dfs_datanode_http_address=0.0.0.0:9864
-      - HDFS_CONF_dfs_datanode_ipc_address=0.0.0.0:9867
-    networks:
-      - hive-net
-
-  hive-init:
-    image: bde2020/hadoop-base:2.0.0-hadoop2.7.4-java8
-    container_name: hive-init
-    depends_on:
-      - namenode
-    networks:
-      - hive-net
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-    command: >
-      sh -c "
-        echo 'Waiting for HDFS to come up...';
-        until hdfs dfs -ls /; do
-          sleep 3;
-        done;
-      
-        echo 'HDFS is ready. Setting up directories and permissions...';
-      
-        hdfs dfs -mkdir -p /tmp/hive;
-        hdfs dfs -mkdir -p /user/hive/warehouse;
-        hdfs dfs -chmod 1777 /tmp;
-        hdfs dfs -chmod -R 777 /tmp/hive;
-        hdfs dfs -chown -R hive /user/hive;
-      
-        echo 'HDFS setup complete.';
-      "
-    restart: on-failure
-
-  hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.3.0
-    container_name: hive-metastore-postgresql
-    hostname: hive-metastore-postgresql
-    restart: always
-    volumes:
-      - metastore-db-data:/var/lib/postgresql/data
+  #########################################
+  # 1. Hive Metastore Database (PostgreSQL)
+  #########################################
+  postgres-metastore:
+    image: postgres:12
+    container_name: postgres-metastore
     environment:
       - POSTGRES_USER=hive
       - POSTGRES_PASSWORD=hive
       - POSTGRES_DB=metastore
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres/metastore_db:/var/lib/postgresql/data
     networks:
-      - hive-net
+      - hadoop-hive-net
 
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-server
-    hostname: hive-server
-    restart: always
+  #########################################
+  # 2. Hadoop Cluster (HDFS + YARN)
+  #########################################
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.3.4-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "9000:9000"  # HDFS Port
+    volumes:
+      - ./data/hadoop/namenode:/hadoop/dfs/name
+    networks:
+      - hadoop-hive-net
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.3.4-java8
+    container_name: datanode
+    depends_on:
+      - namenode
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    volumes:
+      - ./data/hadoop/datanode:/hadoop/dfs/data
+    networks:
+      - hadoop-hive-net
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.3.4-java8
+    container_name: resourcemanager
     depends_on:
       - namenode
       - datanode
-      - hive-metastore-postgresql
-      - hive-init  # <-- This waits for the setup service to finish
-    ports:
-      - "10000:10000"
-      - "10002:10002"
-    volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
     environment:
-      - HADOOP_USER_NAME=hive
-      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      - METASTORE_DB_TYPE=postgres
-      - METASTORE_DB_HOSTNAME=hive-metastore-postgresql
-      - METASTORE__DB_USER=hive
-      - METASTORE_DB_PASSWORD=hive
-      - METASTORE_DB_NAME=metastore
+    ports:
+      - "8088:8088"  # YARN Web UI
     networks:
-      - hive-net
+      - hadoop-hive-net
 
-networks:
-  hive-net:
-    driver: bridge
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.3.4-java8
+    container_name: nodemanager
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+    environment:
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    networks:
+      - hadoop-hive-net
+
+  #########################################
+  # 3. Hive Services
+  #########################################
+  hive-metastore:
+    image: bde2020/hive-metastore:2.0.0-hive3.1.3-java8
+    container_name: hive-metastore
+    depends_on:
+      - namenode
+      - postgres-metastore
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870 postgres-metastore:5432
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - METASTORE_DB_HOSTNAME=postgres-metastore
+      - METASTORE_DB_NAME=metastore
+      - METASTORE_DB_USER=hive
+      - METASTORE_DB_PASSWORD=hive
+    networks:
+      - hadoop-hive-net
+
+  hive-server:
+    image: bde2020/hive-server:2.0.0-hive3.1.3-java8
+    container_name: hive-server
+    depends_on:
+      - namenode
+      - hive-metastore
+      - resourcemanager
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870 hive-metastore:9083 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
+    ports:
+      - "10000:10000" # HiveServer2 Thrift port
+      - "10002:10002" # HiveServer2 Web UI
+    networks:
+      - hadoop-hive-net
 
 volumes:
-  namenode-data:
-  datanode-data:
-  metastore-db-data:
+  data:
+
+networks:
+  hadoop-hive-net:
