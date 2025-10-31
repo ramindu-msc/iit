@@ -22,7 +22,8 @@ services:
   # 2. Hadoop Cluster (HDFS + YARN)
   #########################################
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.3.4-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hadoop-namenode:hadoop3.3.4-java8
     container_name: namenode
     environment:
       - CLUSTER_NAME=hadoop-cluster
@@ -36,7 +37,8 @@ services:
       - hadoop-hive-net
 
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.3.4-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hadoop-datanode:hadoop3.3.4-java8
     container_name: datanode
     depends_on:
       - namenode
@@ -49,7 +51,8 @@ services:
       - hadoop-hive-net
 
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.3.4-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hadoop-resourcemanager:hadoop3.3.4-java8
     container_name: resourcemanager
     depends_on:
       - namenode
@@ -63,7 +66,8 @@ services:
       - hadoop-hive-net
 
   nodemanager:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.3.4-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hadoop-nodemanager:hadoop3.3.4-java8
     container_name: nodemanager
     depends_on:
       - namenode
@@ -79,7 +83,8 @@ services:
   # 3. Hive Services
   #########################################
   hive-metastore:
-    image: bde2020/hive-metastore:2.0.0-hive3.1.3-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hive-metastore:hive3.1.3-java8
     container_name: hive-metastore
     depends_on:
       - namenode
@@ -95,7 +100,8 @@ services:
       - hadoop-hive-net
 
   hive-server:
-    image: bde2020/hive-server:2.0.0-hive3.1.3-java8
+    # UPDATED TAG: Removed '2.0.0-' prefix
+    image: bde2020/hive-server:hive3.1.3-java8
     container_name: hive-server
     depends_on:
       - namenode
