@@ -38,11 +38,10 @@ services:
     # 3. COMMAND OVERRIDE:
     #    - 'sleep 30' fixes the 'Connection refused' race condition
     #    - '/opt/hive/bin/hive --service hiveserver2' starts the correct service
-    command: |
-      /bin/bash -c "
-        sleep 30
-        /opt/hive/bin/hive --service hiveserver2
-      "
+    command:
+      - /bin/bash
+      - -c
+      - "sleep 30 && /opt/hive/bin/hive --service hiveserver2"
     ports:
       - "10000:10000"
     depends_on:
