@@ -1,5 +1,4 @@
-version: '3.8'
-
+# 'version' attribute is removed.
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
@@ -7,12 +6,10 @@ services:
     hostname: namenode
     restart: always
     ports:
-      - "9870:9870"  # NameNode Web UI
-      - "9000:9000"  # HDFS Client Port
+      - "9870:9870"
+      - "9000:9000"
     volumes:
-      # Your requested volume, mounted on the namenode
       - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
-      # Persistent volume for HDFS metadata
       - namenode-data:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
@@ -29,7 +26,6 @@ services:
     depends_on:
       - namenode
     volumes:
-      # Persistent volume for HDFS data blocks
       - datanode-data:/hadoop/dfs/data
     environment:
       - SERVICE_PRECONDITION=namenode:9870
@@ -41,12 +37,13 @@ services:
       - hive-net
 
   hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.3.2
+    # --- THIS IS THE FIX ---
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    # -----------------------
     container_name: hive-metastore-postgresql
     hostname: hive-metastore-postgresql
     restart: always
     volumes:
-      # Persistent volume for Metastore database
       - metastore-db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=hive
@@ -65,17 +62,14 @@ services:
       - datanode
       - hive-metastore-postgresql
     ports:
-      - "10000:10000" # HiveServer2 Thrift Port
-      - "10002:10002" # Hive Web UI
+      - "10000:10000"
+      - "10002:10002"
     volumes:
-      # Your requested volume, mounted on the hive-server
       - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
     environment:
       - HADOOP_USER_NAME=hive
       - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
-      # HDFS Configuration
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
-      # Metastore Database Configuration
       - METASTORE_DB_TYPE=postgres
       - METASTORE_DB_HOSTNAME=hive-metastore-postgresql
       - METASTORE_DB_USER=hive
@@ -84,12 +78,10 @@ services:
     networks:
       - hive-net
 
-# Top-level networks definition
 networks:
   hive-net:
     driver: bridge
 
-# Top-level volumes definition for persistence
 volumes:
   namenode-data:
   datanode-data:
