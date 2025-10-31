@@ -33,10 +33,11 @@ public class ProductBinning {
             if (category.equals("household")) {
                 multipleOutputs.write("Electronics", productId, value, "Electronics/part");
                 multipleOutputs.write("Clothing", productId, value, "Clothing/part");
-            } else if (category.equals("Clothing")) {
+            } else if (category.equals("sdfssdg")) {
                 multipleOutputs.write("Clothing", productId, value, "Clothing/part");
-            } else if (category.equals("Groceries")) {
+            } else if (category.equals("fgdgd")) {
                 multipleOutputs.write("Groceries", productId, value, "Groceries/part");
+                multipleOutputs.write("Groceries", productId, value, "dfvdfvdf/part");
             }
         }
 

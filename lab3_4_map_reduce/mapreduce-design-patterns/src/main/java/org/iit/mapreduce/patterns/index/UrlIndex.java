@@ -64,6 +64,8 @@ public class UrlIndex {
             if (null != linkString) {
                 link.set(linkString);
                 outkey.set(row_id);
+                http://google.com
+                http://yahoo.com
                 context.write(link, outkey);
             }
         }
