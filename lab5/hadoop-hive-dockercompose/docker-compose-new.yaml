@@ -14,7 +14,7 @@ services:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
-      - ./data/namenode:/hadoop/dfs/name
+      - ./data_new/namenode:/hadoop/dfs/name
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     ports:
       - "9870:9870"
@@ -40,7 +40,7 @@ services:
       - SERVICE_PRECONDITION=namenode:9870
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
-      - ./data/datanode:/hadoop/dfs/data
+      - ./data_new/datanode:/hadoop/dfs/data
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     depends_on:
       namenode:
