@@ -78,7 +78,7 @@ services:
       retries: 20
 
   # -----------------------------
-  # Hive Metastore (Schema Initialization)
+  # Hive Metastore Schema Initialization
   # -----------------------------
   hive-metastore-init:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -92,8 +92,8 @@ services:
     entrypoint:
       [
         "/wait-for-it.sh",
-        "hive-metastore-postgresql",
-        "5432",
+        "hive-metastore-postgresql:5432",
+        "-t", "60",
         "--",
         "/opt/hive/bin/schematool",
         "-dbType", "postgres",
@@ -109,7 +109,7 @@ services:
       - hadoop-net
 
   # -----------------------------
-  # Hive Metastore (Service)
+  # Hive Metastore Service
   # -----------------------------
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -128,8 +128,8 @@ services:
     entrypoint:
       [
         "/wait-for-it.sh",
-        "hive-metastore-postgresql",
-        "5432",
+        "hive-metastore-postgresql:5432",
+        "-t", "60",
         "--",
         "/opt/hive/bin/hive",
         "--service",
@@ -164,8 +164,8 @@ services:
     entrypoint:
       [
         "/wait-for-it.sh",
-        "hive-metastore",
-        "9083",
+        "hive-metastore:9083",
+        "-t", "60",
         "--",
         "/opt/hive/bin/hiveserver2"
       ]
