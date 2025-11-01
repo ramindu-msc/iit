@@ -17,5 +17,5 @@ else
     hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s)
 fi
 
-# Finally, exec the original entrypoint with all arguments
-exec /docker-entrypoint.sh "$@"
+# Start the official Hadoop entrypoint
+exec /entrypoint.sh "$@"
