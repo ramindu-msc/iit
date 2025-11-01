@@ -97,13 +97,7 @@ services:
         condition: service_completed_successfully
       namenode:
         condition: service_healthy
-    command: >
-      bash -c "
-      echo 'Waiting 60 seconds for HDFS to fully stabilize...';
-      sleep 60;  # <-- Increased to 60 seconds
-      echo 'Starting Hive Metastore...';
-      exec /opt/hive/bin/hive --service metastore
-      "
+    command: /opt/hive/bin/hive --service metastore
     ports:
       - "9083:9083"
     networks:
@@ -113,28 +107,28 @@ services:
   # -----------------------------
   # HiveServer2
   # -----------------------------
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-server
-    platform: linux/amd64
-    env_file:
-      - ./hadoop.env
-    depends_on:
-      hive-metastore:
-        condition: service_started
-      namenode:
-        condition: service_healthy
-    command: >
-      bash -c "
-      echo 'Waiting 90 seconds for Metastore to stabilize...';
-      sleep 90;  # <-- Increased to 90 seconds
-      echo 'Starting HiveServer2...';
-      exec /opt/hive/bin/hiveserver2
-      "
-    ports:
-      - "10000:10000"
-    networks:
-      - hadoop-net
+    # -----------------------------
+    # HiveServer2
+    # -----------------------------
+    hive-server:
+      image: bde2020/hive:2.3.2-postgresql-metastore
+      container_name: hive-server
+      platform: linux/amd64
+      env_file:
+        - ./hadoop.env
+      environment: # <-- Added for HDFS client stability
+        - HADOOP_USER_NAME=root
+      # REMOVE the 'volumes:' block related to wait-for-it.sh
+      depends_on:
+        hive-metastore:
+          condition: service_started
+        namenode:
+          condition: service_healthy
+      command: /opt/hive/bin/hiveserver2 # <-- SIMPLIFIED COMMAND
+      ports:
+        - "10000:10000"
+      networks:
+        - hadoop-net
 
 volumes:
   metastore-db:
