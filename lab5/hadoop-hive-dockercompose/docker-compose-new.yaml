@@ -31,7 +31,7 @@ services:
   # HDFS - DataNode
   # -----------------------------
   datanode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     container_name: datanode
     restart: always
     env_file:
