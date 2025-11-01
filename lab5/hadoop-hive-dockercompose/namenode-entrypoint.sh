@@ -11,5 +11,5 @@ else
     echo "Existing HDFS metadata found. Skipping format."
 fi
 
-# Start NameNode in foreground (Docker needs PID 1)
-exec hdfs namenode -foreground
+# Start NameNode in foreground (default behavior)
+exec hdfs namenode
