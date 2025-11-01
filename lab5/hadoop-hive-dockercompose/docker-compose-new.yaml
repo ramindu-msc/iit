@@ -104,6 +104,8 @@ services:
         condition: service_completed_successfully
       namenode:
         condition: service_healthy
+    environment:
+      - HADOOP_USER_NAME=root
     command: >
       bash -c "
       echo 'Waiting for HDFS to be ready...';
