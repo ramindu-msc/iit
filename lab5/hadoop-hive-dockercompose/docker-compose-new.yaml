@@ -98,7 +98,7 @@ services:
     volumes:
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
       - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/hive", "-f", "/opt/hive/scripts/metastore/hive-schema-2.3.0.postgres.sql" ]
+    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/hive", "-f", "/opt/hive/scripts/metastore/hive-schema-2.3.2.postgres.sql" ]
     depends_on:
       namenode:
         condition: service_healthy
