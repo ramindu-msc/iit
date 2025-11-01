@@ -90,7 +90,9 @@ services:
       - hive-metastore-postgresql
     command: >
       bash -c "
+      echo 'Waiting for PostgreSQL...';
       until pg_isready -h $HIVE_METASTORE_HOST -p $HIVE_METASTORE_PORT -U $HIVE_METASTORE_USER; do sleep 2; done;
+      echo 'Initializing Hive schema...';
       schematool -dbType postgres -initSchema -verbose;
       echo 'Schema initialized!'
       "
