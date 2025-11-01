@@ -121,6 +121,9 @@ services:
     platform: linux/amd64
     env_file:
       - ./hadoop.env
+    volumes:
+      # Mount the wait script into the container's path
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh # <-- ADDED THIS
     depends_on:
       hive-metastore:
         condition: service_started # <-- CHANGED from service_healthy
