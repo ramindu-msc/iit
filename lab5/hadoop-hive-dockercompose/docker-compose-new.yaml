@@ -101,8 +101,8 @@ services:
       bash -c "
       echo 'Waiting 30 seconds for HDFS to stabilize...';
       sleep 30;
-      echo 'Starting Hive Metastore as user hive...';
-      exec gosu hive /opt/hive/bin/hive --service metastore  # <-- USER SWITCH APPLIED
+      echo 'Starting Hive Metastore...';
+      exec /opt/hive/bin/hive --service metastore # <-- REMOVED gosu hive
       "
     ports:
       - "9083:9083"
@@ -129,8 +129,8 @@ services:
       bash -c "
       echo 'Waiting 60 seconds for Metastore to stabilize...';
       sleep 60;
-      echo 'Starting HiveServer2 as user hive...';
-      exec gosu hive /opt/hive/bin/hiveserver2 # <-- USER SWITCH APPLIED
+      echo 'Starting HiveServer2...';
+      exec /opt/hive/bin/hiveserver2 # <-- REMOVED gosu hive
       "
     ports:
       - "10000:10000"
