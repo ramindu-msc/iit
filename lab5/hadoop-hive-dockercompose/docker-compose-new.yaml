@@ -8,6 +8,8 @@ services:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
     restart: always
+    env_file:
+      - ./hadoop-hive.env
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
@@ -35,6 +37,8 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
     restart: always
+    env_file:
+      - ./hadoop-hive.env
     environment:
       - SERVICE_PRECONDITION=namenode:9870
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
@@ -59,6 +63,8 @@ services:
     image: postgres:13
     container_name: hive-metastore-postgresql
     restart: always
+    env_file:
+      - ./hadoop-hive.env
     environment:
       POSTGRES_USER: hive
       POSTGRES_PASSWORD: hive
@@ -77,6 +83,8 @@ services:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore
     restart: always
+    env_file:
+      - ./hadoop-hive.env
     environment:
       - HIVE_METASTORE_DB_HOST=hive-metastore-postgresql
       - HIVE_METASTORE_DB_NAME=metastore
@@ -102,6 +110,8 @@ services:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-server
     restart: always
+    env_file:
+      - ./hadoop-hive.env
     environment:
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
