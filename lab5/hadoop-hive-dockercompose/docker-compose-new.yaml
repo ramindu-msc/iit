@@ -92,12 +92,14 @@ services:
     container_name: hive-metastore
     env_file:
       - ./hadoop.env
+    environment: # Added for HDFS client stability
+      - HADOOP_USER_NAME=root
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
       namenode:
         condition: service_healthy
-    command: /opt/hive/bin/hive --service metastore
+    command: /opt/hive/bin/hive --service metastore # <-- Simplified command
     ports:
       - "9083:9083"
     networks:
@@ -110,25 +112,24 @@ services:
     # -----------------------------
     # HiveServer2
     # -----------------------------
-    hive-server:
-      image: bde2020/hive:2.3.2-postgresql-metastore
-      container_name: hive-server
-      platform: linux/amd64
-      env_file:
-        - ./hadoop.env
-      environment: # <-- Added for HDFS client stability
-        - HADOOP_USER_NAME=root
-      # REMOVE the 'volumes:' block related to wait-for-it.sh
-      depends_on:
-        hive-metastore:
-          condition: service_started
-        namenode:
-          condition: service_healthy
-      command: /opt/hive/bin/hiveserver2 # <-- SIMPLIFIED COMMAND
-      ports:
-        - "10000:10000"
-      networks:
-        - hadoop-net
+  hive-server: # <-- ENSURE THIS IS ALIGNED WITH 'hive-metastore'
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    platform: linux/amd64
+    env_file:
+      - ./hadoop.env
+    environment: # Added for HDFS client stability
+      - HADOOP_USER_NAME=root
+    depends_on:
+      hive-metastore:
+        condition: service_started
+      namenode:
+        condition: service_healthy
+    command: /opt/hive/bin/hiveserver2 # <-- Simplified command
+    ports:
+      - "10000:10000"
+    networks:
+      - hadoop-net
 
 volumes:
   metastore-db:
