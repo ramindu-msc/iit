@@ -96,9 +96,9 @@ services:
     container_name: hive-metastore
     env_file:
       - ./hadoop.env
-    volumes:
-      # Mount the wait script into the container's path
-      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh # <-- ADDED THIS
+#    volumes:
+#      # Mount the wait script into the container's path
+#      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh # <-- ADDED THIS
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
@@ -106,7 +106,12 @@ services:
         condition: service_healthy
     command: >
       bash -c "
-      echo 'Starting Hive Metastore...';
+      echo 'Waiting for HDFS to be ready...';
+      until hdfs dfs -ls /; do
+        echo 'HDFS not yet ready... sleeping';
+        sleep 5;
+      done;
+      echo 'HDFS is ready. Starting Hive Metastore...';
       exec /opt/hive/bin/hive --service metastore
       "
     ports:
