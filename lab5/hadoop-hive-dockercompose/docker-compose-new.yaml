@@ -15,20 +15,18 @@ services:
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
     volumes:
       - ./data/namenode:/hadoop/dfs/name
-      - ./namenode-entrypoint.sh:/namenode-entrypoint.sh:ro
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     ports:
-      - "9870:9870"   # Web UI
-      - "9000:9000"   # HDFS RPC
+      - "9870:9870"
+      - "9000:9000"
       - "8020:8020"
-    entrypoint: [ "/namenode-entrypoint.sh" ]
+    networks:
+      - hadoop-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9870"]
       interval: 10s
       timeout: 5s
       retries: 20
-    networks:
-      - hadoop-net
 
   # -----------------------------
   # HDFS - DataNode
@@ -48,13 +46,13 @@ services:
     depends_on:
       namenode:
         condition: service_healthy
+    networks:
+      - hadoop-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9864"]
       interval: 10s
       timeout: 5s
       retries: 20
-    networks:
-      - hadoop-net
 
   # -----------------------------
   # PostgreSQL for Hive Metastore
@@ -63,8 +61,6 @@ services:
     image: postgres:13
     container_name: hive-metastore-postgresql
     restart: always
-    env_file:
-      - ./hadoop.env
     environment:
       POSTGRES_USER: hive
       POSTGRES_PASSWORD: hive
@@ -98,7 +94,7 @@ services:
     volumes:
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
       - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/hive", "--service", "metastore" ]
+    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/schematool", "-dbType", "postgres", "-initSchema" ]
     depends_on:
       namenode:
         condition: service_healthy
@@ -106,11 +102,8 @@ services:
         condition: service_healthy
       hive-metastore-postgresql:
         condition: service_healthy
-    ports:
-      - "9083:9083"
     networks:
       - hadoop-net
-
 
   # -----------------------------
   # HiveServer2
