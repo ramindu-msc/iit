@@ -18,21 +18,21 @@ services:
     env_file:
       - ./hadoop.env
     entrypoint: >
-      bash -c '
-        echo "Checking NameNode metadata..."
+      bash -c "
+        echo 'Checking NameNode metadata...';
         if [ -f /hadoop/dfs/name/current/VERSION ]; then
-          echo "Existing HDFS metadata found. Checking version..."
-          grep -q "layoutVersion=-65" /hadoop/dfs/name/current/VERSION || {
-            echo "Old layout version found! Reformatting NameNode..."
-            rm -rf /hadoop/dfs/name/*
-            hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s)
+          echo 'Existing HDFS metadata found. Checking version...';
+          grep -q 'layoutVersion=-65' /hadoop/dfs/name/current/VERSION || {
+            echo 'Old layout version found! Reformatting NameNode...';
+            rm -rf /hadoop/dfs/name/*;
+            hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s);
           }
         else
-          echo "No existing NameNode data found. Formatting fresh NameNode..."
-          hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s)
-        fi
+          echo 'No existing NameNode data found. Formatting fresh NameNode...';
+          hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s);
+        fi;
         /entrypoint.sh
-      '
+      "
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9870"]
       interval: 10s
@@ -56,9 +56,6 @@ services:
       - "9864:9864"
     env_file:
       - ./hadoop.env
-    depends_on:
-      namenode:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9864"]
       interval: 10s
@@ -100,13 +97,6 @@ services:
       - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
     ports:
       - "9083:9083"
-    depends_on:
-      namenode:
-        condition: service_healthy
-      datanode:
-        condition: service_healthy
-      hive-metastore-postgresql:
-        condition: service_started
     networks:
       - hadoop-net
 
@@ -126,13 +116,6 @@ services:
     ports:
       - "10000:10000"  # JDBC
       - "10002:10002"  # Web UI
-    depends_on:
-      namenode:
-        condition: service_healthy
-      datanode:
-        condition: service_healthy
-      hive-metastore:
-        condition: service_started
     networks:
       - hadoop-net
 
