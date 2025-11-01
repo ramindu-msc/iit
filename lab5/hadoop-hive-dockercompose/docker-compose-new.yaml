@@ -9,15 +9,15 @@ services:
     container_name: namenode
     restart: always
     env_file:
-      - ./hadoop.env # Contains HDFS configuration (CORE_CONF, HDFS_CONF)
+      - ./hadoop.env
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/namenode:/hadoop/dfs/name
     ports:
-      - "50070:50070" # HDFS Web UI
-      - "8020:8020"   # HDFS RPC Port
+      - "50070:50070"
+      - "8020:8020"
     networks:
       - hadoop-net
     healthcheck:
@@ -34,7 +34,7 @@ services:
     container_name: datanode
     restart: always
     env_file:
-      - ./hadoop.env # Contains HDFS configuration (HDFS_CONF)
+      - ./hadoop.env
     environment:
       - SERVICE_PRECONDITION=namenode:8020
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
@@ -47,10 +47,10 @@ services:
       - hadoop-net
 
   # -----------------------------
-  # PostgreSQL for Hive Metastore (v12 for MD5 compatibility)
+  # PostgreSQL for Hive Metastore
   # -----------------------------
   hive-metastore-postgresql:
-    image: postgres:12 # FIXED for driver compatibility
+    image: postgres:12
     container_name: hive-metastore-postgresql
     restart: always
     environment:
@@ -73,15 +73,16 @@ services:
   # Hive Metastore Schema Initialization
   # -----------------------------
   hive-metastore-init:
-    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
+    image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore-init
     # Removed env_file to prevent HDFS configuration conflict
-    environment: # Explicitly setting Metastore variables
-      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
-      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
-      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
-      - HIVE_METASTORE_DB_USER=hive
-      - HIVE_METASTORE_DB_PASSWORD=hive
+    environment: # <-- FINAL CORRECT ENVIRONMENT VARIABLES
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword=hive
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://hive-metastore:9083
+      - HIVE_SITE_CONF_hive_metastore_warehouse_dir=/user/hive/warehouse
     depends_on:
       hive-metastore-postgresql:
         condition: service_healthy
@@ -93,15 +94,16 @@ services:
 
 
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
+    image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore
     # Removed env_file to prevent HDFS configuration conflict
-    environment: # Explicitly setting Metastore variables
-      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
-      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
-      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
-      - HIVE_METASTORE_DB_USER=hive
-      - HIVE_METASTORE_DB_PASSWORD=hive
+    environment: # <-- FINAL CORRECT ENVIRONMENT VARIABLES
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword=hive
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://hive-metastore:9083
+      - HIVE_SITE_CONF_hive_metastore_warehouse_dir=/user/hive/warehouse
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
@@ -124,16 +126,17 @@ services:
   # HiveServer2
   # -----------------------------
   hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
+    image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-server
     platform: linux/amd64
     # Removed env_file to prevent HDFS configuration conflict
-    environment: # Explicitly setting Metastore variables
-      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
-      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
-      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
-      - HIVE_METASTORE_DB_USER=hive
-      - HIVE_METASTORE_DB_PASSWORD=hive
+    environment: # <-- FINAL CORRECT ENVIRONMENT VARIABLES
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword=hive
+      - HIVE_SITE_CONF_hive_metastore_uris=thrift://hive-metastore:9083
+      - HIVE_SITE_CONF_hive_metastore_warehouse_dir=/user/hive/warehouse
     volumes:
       - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh
     depends_on:
