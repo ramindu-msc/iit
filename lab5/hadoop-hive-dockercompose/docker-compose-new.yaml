@@ -83,10 +83,9 @@ services:
     depends_on:
       hive-metastore-postgresql:
         condition: service_healthy
-      namenode: # <-- ADD THIS
+      namenode:
         condition: service_healthy
-    command: >
-      bash -c "schematool -dbType postgres -initSchema -verbose"
+    command: [ "schematool", "-dbType", "postgres", "-initSchema", "-verbose" ] # <-- FIX HERE
     networks:
       - hadoop-net
   
@@ -130,8 +129,6 @@ services:
       - hadoop-net
 
 volumes:
-  namenode-data:
-  datanode-data:
   metastore-db:
 
 networks:
