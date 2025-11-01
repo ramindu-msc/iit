@@ -12,13 +12,11 @@ services:
       - CLUSTER_NAME=hadoop-cluster
     volumes:
       - namenode-data:/hadoop/dfs/name
-      - ./namenode-entrypoint.sh:/namenode-entrypoint.sh
+      - ./namenode-entrypoint.sh:/namenode-entrypoint.sh:ro
     ports:
-      - "9870:9870"
-      - "9000:9000"
-    env_file:
-      - ./hadoop.env
-    entrypoint: ["/namenode-entrypoint.sh"]
+      - "9870:9870"   # Web UI
+      - "9000:9000"   # HDFS
+    entrypoint: ["/bin/bash", "/namenode-entrypoint.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9870"]
       interval: 10s
@@ -40,10 +38,9 @@ services:
       - datanode-data:/hadoop/dfs/data
     ports:
       - "9864:9864"
-    env_file:
-      - ./hadoop.env
     depends_on:
-      - namenode
+      namenode:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9864"]
       interval: 10s
@@ -82,12 +79,16 @@ services:
       - HIVE_METASTORE_DB_NAME=metastore
       - HIVE_METASTORE_DB_USER=hive
       - HIVE_METASTORE_DB_PASS=hive
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
     ports:
       - "9083:9083"
     depends_on:
-      - namenode
-      - datanode
-      - hive-metastore-postgresql
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      hive-metastore-postgresql:
+        condition: service_started
     networks:
       - hadoop-net
 
@@ -103,13 +104,17 @@ services:
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName=hive
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword=hive
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore:9083
     ports:
-      - "10000:10000"
-      - "10002:10002"
+      - "10000:10000"  # JDBC
+      - "10002:10002"  # Web UI
     depends_on:
-      - namenode
-      - datanode
-      - hive-metastore
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      hive-metastore:
+        condition: service_started
     networks:
       - hadoop-net
 
