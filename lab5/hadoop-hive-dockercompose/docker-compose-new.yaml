@@ -95,21 +95,19 @@ services:
       - HIVE_METASTORE_DB_NAME=metastore
       - HIVE_METASTORE_DB_USER=hive
       - HIVE_METASTORE_DB_PASS=hive
-      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
-    ports:
-      - "9083:9083"  # Thrift URI
+    volumes:
+      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/hive", "-f", "/opt/hive/scripts/metastore/hive-schema-2.3.0.postgres.sql" ]
     depends_on:
       namenode:
         condition: service_healthy
       datanode:
         condition: service_healthy
       hive-metastore-postgresql:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9083"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+        condition: service_started
+    ports:
+      - "9083:9083"
     networks:
       - hadoop-net
 
@@ -123,19 +121,21 @@ services:
     env_file:
       - ./hadoop.env
     environment:
-      # Connect HiveServer2 to Hive Metastore Thrift service
       - HIVE_METASTORE_URI=thrift://hive-metastore:9083
-      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore:9083
-    ports:
-      - "10000:10000"  # JDBC
-      - "10002:10002"  # Web UI
+    volumes:
+      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    entrypoint: [ "/wait-for-it.sh", "hive-metastore", "9083", "--", "/opt/hive/bin/hiveserver2" ]
     depends_on:
       namenode:
         condition: service_healthy
       datanode:
         condition: service_healthy
       hive-metastore:
-        condition: service_healthy
+        condition: service_started
+    ports:
+      - "10000:10000"
+      - "10002:10002"
     networks:
       - hadoop-net
 
