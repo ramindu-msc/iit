@@ -105,7 +105,6 @@ services:
       - hadoop
 
   hive-metastore:
-    # 1. FIXED: Use an image built for Hadoop 3.2.1
     image: vengleab/docker-hive:hive-hadoop-3.2.1-amd-only
     container_name: hive-metastore
     restart: always
@@ -115,17 +114,14 @@ services:
     ports:
       - "9083:9083" # Metastore Thrift port
     environment:
-      SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000 namenode:9870"
-      # These credentials are for this service to run schematool
-      HIVE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-postgres:5432/metastore"
-      HIVE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
-      HIVE_CONF_javax_jdo_option_ConnectionUserName: "hive"
-      HIVE_CONF_javax_jdo_option_ConnectionPassword: "hive"
+      # This service just needs postgres and hadoop to be up
+      SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000"
+      # NO DATABASE CREDENTIALS HERE
     env_file:
       - ./hadoop.env
     networks:
       - hadoop
-    # 2. FIXED: This command forces this container to run the *metastore* service
+    # This command forces this container to run the *metastore* service
     command: /opt/hive/bin/hive --service metastore
 
   hive-server:
