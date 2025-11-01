@@ -80,23 +80,32 @@ services:
   # -----------------------------
   # Hive Metastore
   # -----------------------------
-  hive-metastore:
+  hive-metastore-init:
     image: bde2020/hive:2.1.0-postgresql-metastore
-    container_name: hive-metastore
-    platform: linux/amd64
+    container_name: hive-metastore-init
     env_file:
       - ./hadoop.env
     depends_on:
-      hive-metastore-postgresql:
-        condition: service_healthy
+      - hive-metastore-postgresql
     command: >
       bash -c "
       echo 'Waiting for PostgreSQL...';
-      until pg_isready -h hive-metastore-postgresql -p 5432 -U $HIVE_METASTORE_USER; do
-          sleep 2;
-      done;
+      until pg_isready -h hive-metastore-postgresql -p 5432 -U $HIVE_METASTORE_USER; do sleep 2; done;
       echo 'PostgreSQL ready. Initializing schema...';
       schematool -dbType postgres -initSchema -verbose;
+      echo 'Schema initialized!'
+      "
+
+  hive-metastore:
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      hive-metastore-init:
+        condition: service_completed_successfully
+    command: >
+      bash -c "
       echo 'Starting Hive Metastore...';
       exec /opt/hive/bin/hive --service metastore
       "
