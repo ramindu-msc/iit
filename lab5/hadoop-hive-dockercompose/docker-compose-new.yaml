@@ -2,23 +2,22 @@ version: '3.8'
 
 services:
   # -----------------------------
-  # HDFS - NameNode
+  # HDFS - NameNode (Hadoop 2.7.4)
   # -----------------------------
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
     container_name: namenode
     restart: always
     env_file:
-      - ./hadoop.env
+      - ./hadoop.env # Contains HDFS configuration (CORE_CONF, HDFS_CONF)
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/namenode:/hadoop/dfs/name
-#      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
     ports:
-      - "50070:50070"                                     # <-- FIXED PORT
-      - "8020:8020"
+      - "50070:50070" # HDFS Web UI
+      - "8020:8020"   # HDFS RPC Port
     networks:
       - hadoop-net
     healthcheck:
@@ -28,20 +27,19 @@ services:
       retries: 20
 
   # -----------------------------
-  # HDFS - DataNode
+  # HDFS - DataNode (Hadoop 2.7.4)
   # -----------------------------
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8  # <-- FIXED IMAGE
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     container_name: datanode
     restart: always
     env_file:
-      - ./hadoop.env
+      - ./hadoop.env # Contains HDFS configuration (HDFS_CONF)
     environment:
       - SERVICE_PRECONDITION=namenode:8020
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/datanode:/hadoop/dfs/data
-#      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
     depends_on:
       namenode:
         condition: service_healthy
@@ -49,10 +47,10 @@ services:
       - hadoop-net
 
   # -----------------------------
-  # PostgreSQL for Hive Metastore
+  # PostgreSQL for Hive Metastore (v12 for MD5 compatibility)
   # -----------------------------
   hive-metastore-postgresql:
-    image: postgres:12
+    image: postgres:12 # FIXED for driver compatibility
     container_name: hive-metastore-postgresql
     restart: always
     environment:
@@ -61,7 +59,6 @@ services:
       POSTGRES_DB: metastore
     volumes:
       - metastore-db:/var/lib/postgresql/data
-#      - ./init-metastore.sql:/docker-entrypoint-initdb.d/init-metastore.sql
     ports:
       - "5432:5432"
     networks:
@@ -71,37 +68,45 @@ services:
       interval: 5s
       retries: 20
       timeout: 5s
-#    command: ["postgres", "-c", "password_encryption=md5"]
 
   # -----------------------------
-  # Hive Metastore
+  # Hive Metastore Schema Initialization
   # -----------------------------
   hive-metastore-init:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
     container_name: hive-metastore-init
-    env_file:
-      - ./hadoop.env
+    # Removed env_file to prevent HDFS configuration conflict
+    environment: # Explicitly setting Metastore variables
+      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
+      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
+      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_METASTORE_DB_USER=hive
+      - HIVE_METASTORE_DB_PASSWORD=hive
     depends_on:
       hive-metastore-postgresql:
         condition: service_healthy
       namenode:
         condition: service_healthy
-    command: [ "schematool", "-dbType", "postgres", "-initSchema", "-verbose" ] # <-- FIX HERE
+    command: [ "schematool", "-dbType", "postgres", "-initSchema", "-verbose" ]
     networks:
       - hadoop-net
-  
+
 
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
     container_name: hive-metastore
-    env_file:
-      - ./hadoop.env
+    # Removed env_file to prevent HDFS configuration conflict
+    environment: # Explicitly setting Metastore variables
+      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
+      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
+      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_METASTORE_DB_USER=hive
+      - HIVE_METASTORE_DB_PASSWORD=hive
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
       namenode:
         condition: service_healthy
-    # We remove the custom 'environment' section to rely on the clean env_file settings
     command: >
       bash -c "
       echo 'Waiting 30 seconds for HDFS to stabilize...';
@@ -119,19 +124,25 @@ services:
   # HiveServer2
   # -----------------------------
   hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bde2020/hive:2.3.2-postgresql-metastore # UPGRADED IMAGE
     container_name: hive-server
     platform: linux/amd64
-    env_file:
-      - ./hadoop.env
+    # Removed env_file to prevent HDFS configuration conflict
+    environment: # Explicitly setting Metastore variables
+      - HIVE_METASTORE_URIS=thrift://hive-metastore:9083
+      - HIVE_METASTORE_WAREHOUSE_DIR=/user/hive/warehouse
+      - HIVE_METASTORE_DB_URL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
+      - HIVE_METASTORE_DB_USER=hive
+      - HIVE_METASTORE_DB_PASSWORD=hive
     volumes:
-      # Mount the wait script into the container's path
-      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh # <-- ADDED THIS
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh
     depends_on:
       hive-metastore:
-        condition: service_started # <-- CHANGED from service_healthy
+        condition: service_started
       namenode:
         condition: service_healthy
+    command: >
+      bash -c "/usr/local/bin/wait-for-it.sh hive-metastore 9083 -- /opt/hive/bin/hiveserver2"
     ports:
       - "10000:10000"
     networks:
