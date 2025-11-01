@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # -----------------------------
-  # HDFS - NameNode
+  # HDFS NameNode
   # -----------------------------
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -29,7 +29,7 @@ services:
       retries: 20
 
   # -----------------------------
-  # HDFS - DataNode
+  # HDFS DataNode
   # -----------------------------
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -58,9 +58,9 @@ services:
   # Hive Metastore PostgreSQL
   # -----------------------------
   hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.1.0
+    image: postgres:14
     container_name: hive-metastore-postgresql
-    platform: linux/amd64
+    restart: always
     environment:
       POSTGRES_USER: hive
       POSTGRES_PASSWORD: hive
@@ -77,25 +77,7 @@ services:
       retries: 20
 
   # -----------------------------
-  # Hive Metastore Init (runs schematool)
-  # -----------------------------
-  hive-metastore-init:
-    image: bde2020/hive:2.1.0-postgresql-metastore
-    container_name: hive-metastore-init
-    platform: linux/amd64
-    env_file:
-      - ./hadoop.env
-    depends_on:
-      hive-metastore-postgresql:
-        condition: service_healthy
-    volumes:
-      - ./wait-for-it.sh:/wait-for-it.sh
-    command: >
-      /wait-for-it.sh hive-metastore-postgresql:5432 -- 
-      /opt/hive/bin/schematool -dbType postgres -initSchema
-
-  # -----------------------------
-  # Hive Metastore Service
+  # Hive Metastore (auto-initializes schema)
   # -----------------------------
   hive-metastore:
     image: bde2020/hive:2.1.0-postgresql-metastore
@@ -104,15 +86,20 @@ services:
     env_file:
       - ./hadoop.env
     depends_on:
-      - hive-metastore-init
-    command: /opt/hive/bin/hive --service metastore
+      hive-metastore-postgresql:
+        condition: service_healthy
+    command: >
+      bash -c "
+      schematool -dbType postgres -initSchema &&
+      /opt/hive/bin/hive --service metastore
+      "
     ports:
       - "9083:9083"
     networks:
       - hadoop-net
 
   # -----------------------------
-  # Hive Server
+  # HiveServer2
   # -----------------------------
   hive-server:
     image: bde2020/hive:2.1.0-postgresql-metastore
@@ -126,8 +113,6 @@ services:
       - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     ports:
       - "10000:10000"
-    environment:
-      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore"
     networks:
       - hadoop-net
 
