@@ -10,35 +10,36 @@ services:
     restart: always
     environment:
       - CLUSTER_NAME=hadoop-cluster
+      - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
     volumes:
       - namenode-data:/hadoop/dfs/name
       - ./namenode-entrypoint.sh:/namenode-entrypoint.sh:ro
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     ports:
       - "9870:9870"   # Web UI
-      - "9000:9000"   # HDFS
-    entrypoint: ["/namenode-entrypoint.sh"]
+      - "9000:9000"   # HDFS RPC
+    entrypoint: [ "/namenode-entrypoint.sh" ]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9870"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9870" ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
     networks:
       - hadoop-net
 
-  # -----------------------------
-  # HDFS - DataNode
-  # -----------------------------
+    # -----------------------------
+    # HDFS - DataNode
+    # -----------------------------
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
     restart: always
     environment:
       - SERVICE_PRECONDITION=namenode:9870
+      - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
     volumes:
       - datanode-data:/hadoop/dfs/data
-    ports:
-      - "9864:9864"
+      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     depends_on:
       namenode:
         condition: service_healthy
@@ -46,7 +47,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9864"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
     networks:
       - hadoop-net
 
