@@ -67,7 +67,7 @@ services:
       POSTGRES_DB: metastore
     volumes:
       - metastore-db:/var/lib/postgresql/data
-      - ./init-metastore.sql:/docker-entrypoint-initdb.d/init-metastore.sql
+#      - ./init-metastore.sql:/docker-entrypoint-initdb.d/init-metastore.sql
     ports:
       - "5432:5432"
     networks:
@@ -88,6 +88,8 @@ services:
       - ./hadoop.env
     depends_on:
       hive-metastore-postgresql:
+        condition: service_healthy
+      namenode: # <-- ADD THIS
         condition: service_healthy
     command: >
       bash -c "schematool -dbType postgres -initSchema -verbose"
