@@ -54,133 +54,28 @@ services:
       timeout: 5s
       retries: 20
 
-  # -----------------------------
-  # PostgreSQL for Hive Metastore
-  # -----------------------------
-  hive-metastore-postgresql:
-    image: postgres:13
-    container_name: hive-metastore-postgresql
-    restart: always
-    environment:
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
-      POSTGRES_DB: metastore
-    volumes:
-      - metastore-db:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - hadoop-net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hive"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
-  # -----------------------------
-  # Hive Metastore Schema Initialization
-  # -----------------------------
-  hive-metastore-init:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-metastore-init
-    restart: "no"
-    env_file:
-      - ./hadoop.env
-    volumes:
-      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
-      - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint:
-      [
-        "/wait-for-it.sh",
-        "hive-metastore-postgresql:5432",
-        "-t", "60",
-        "--",
-        "/opt/hive/bin/schematool",
-        "-dbType", "postgres",
-        "-url", "jdbc:postgresql://hive-metastore-postgresql:5432/metastore",
-        "-user", "hive",
-        "-pass", "hive",
-        "-initSchema"
-      ]
-    depends_on:
-      hive-metastore-postgresql:
-        condition: service_healthy
-    networks:
-      - hadoop-net
-
-  # -----------------------------
-  # Hive Metastore Service
-  # -----------------------------
-  hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-metastore
-    restart: always
-    env_file:
-      - ./hadoop.env
-    environment:
-      - HIVE_METASTORE_DB_HOST=hive-metastore-postgresql
-      - HIVE_METASTORE_DB_NAME=metastore
-      - HIVE_METASTORE_DB_USER=hive
-      - HIVE_METASTORE_DB_PASS=hive
-    volumes:
-      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
-      - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint:
-      [
-        "/wait-for-it.sh",
-        "hive-metastore-postgresql:5432",
-        "-t", "60",
-        "--",
-        "/opt/hive/bin/hive",
-        "--service",
-        "metastore"
-      ]
-    depends_on:
-      namenode:
-        condition: service_healthy
-      datanode:
-        condition: service_healthy
-      hive-metastore-init:
-        condition: service_completed_successfully
-    ports:
-      - "9083:9083"
-    networks:
-      - hadoop-net
-
-  # -----------------------------
-  # HiveServer2
-  # -----------------------------
   hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    platform: linux/amd64
+    volumes:
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     container_name: hive-server
-    restart: always
     env_file:
       - ./hadoop.env
     environment:
-      - HIVE_METASTORE_URI=thrift://hive-metastore:9083
-    volumes:
-      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
-      - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint:
-      [
-        "/wait-for-it.sh",
-        "hive-metastore:9083",
-        "-t", "60",
-        "--",
-        "/opt/hive/bin/hiveserver2"
-      ]
-    depends_on:
-      namenode:
-        condition: service_healthy
-      datanode:
-        condition: service_healthy
-      hive-metastore:
-        condition: service_healthy
+      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
     ports:
       - "10000:10000"
-      - "10002:10002"
-    networks:
-      - hadoop-net
+  hive-metastore:
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    platform: linux/amd64
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop.env
+    command: /opt/hive/bin/hive --service metastore
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.1.0
+    platform: linux/amd64
 
 volumes:
   namenode-data:
