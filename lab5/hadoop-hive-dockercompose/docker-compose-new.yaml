@@ -87,15 +87,12 @@ services:
     env_file:
       - ./hadoop.env
     depends_on:
-      - hive-metastore-postgresql
+      hive-metastore-postgresql:
+        condition: service_healthy
     command: >
-      bash -c "
-      echo 'Waiting for PostgreSQL...';
-      until pg_isready -h $HIVE_METASTORE_HOST -p $HIVE_METASTORE_PORT -U $HIVE_METASTORE_USER; do sleep 2; done;
-      echo 'Initializing Hive schema...';
-      schematool -dbType postgres -initSchema -verbose;
-      echo 'Schema initialized!'
-      "
+      bash -c "schematool -dbType postgres -initSchema -verbose"
+    networks:
+      - hadoop-net
   
 
   hive-metastore:
