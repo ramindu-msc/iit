@@ -16,7 +16,7 @@ services:
     ports:
       - "9870:9870"   # Web UI
       - "9000:9000"   # HDFS
-    entrypoint: ["/bin/bash", "/namenode-entrypoint.sh"]
+    entrypoint: ["/namenode-entrypoint.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9870"]
       interval: 10s
