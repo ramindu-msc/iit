@@ -82,7 +82,7 @@ services:
   # Hive Metastore
   # -----------------------------
   hive-metastore-init:
-    image: bde2020/hive:2.1.0-postgresql-metastore
+    image: bde2020/hive:2.3.9-hadoop3.2.1
     container_name: hive-metastore-init
     env_file:
       - ./hadoop.env
@@ -98,7 +98,7 @@ services:
   
 
   hive-metastore:
-    image: bde2020/hive:2.1.0-postgresql-metastore
+    image: bde2020/hive:2.3.9-hadoop3.2.1
     container_name: hive-metastore
     env_file:
       - ./hadoop.env
@@ -120,13 +120,15 @@ services:
   # HiveServer2
   # -----------------------------
   hive-server:
-    image: bde2020/hive:2.1.0-postgresql-metastore
+    image: bde2020/hive:2.3.9-hadoop3.2.1
     container_name: hive-server
     platform: linux/amd64
     env_file:
       - ./hadoop.env
     depends_on:
       hive-metastore:
+        condition: service_healthy
+      namenode: # <-- ADD THIS DEPENDENCY
         condition: service_healthy
     ports:
       - "10000:10000"
