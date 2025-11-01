@@ -52,7 +52,7 @@ services:
   # PostgreSQL for Hive Metastore
   # -----------------------------
   hive-metastore-postgresql:
-    image: postgres:14
+    image: postgres:12
     container_name: hive-metastore-postgresql
     restart: always
     environment:
@@ -71,7 +71,7 @@ services:
       interval: 5s
       retries: 20
       timeout: 5s
-    command: ["postgres", "-c", "password_encryption=md5"]
+#    command: ["postgres", "-c", "password_encryption=md5"]
 
   # -----------------------------
   # Hive Metastore
