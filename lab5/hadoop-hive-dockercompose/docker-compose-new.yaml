@@ -90,12 +90,11 @@ services:
       - hive-metastore-postgresql
     command: >
       bash -c "
-      echo 'Waiting for PostgreSQL...';
-      until pg_isready -h hive-metastore-postgresql -p 5432 -U $HIVE_METASTORE_USER; do sleep 2; done;
-      echo 'PostgreSQL ready. Initializing schema...';
+      until pg_isready -h $HIVE_METASTORE_HOST -p $HIVE_METASTORE_PORT -U $HIVE_METASTORE_USER; do sleep 2; done;
       schematool -dbType postgres -initSchema -verbose;
       echo 'Schema initialized!'
       "
+  
 
   hive-metastore:
     image: bde2020/hive:2.1.0-postgresql-metastore
@@ -114,6 +113,7 @@ services:
       - "9083:9083"
     networks:
       - hadoop-net
+
 
   # -----------------------------
   # HiveServer2
