@@ -36,6 +36,11 @@ services:
       - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
     ports:
       - "10000:10000"
+    # ADD THIS BLOCK:
+    depends_on:
+      - hive-metastore
+      - namenode
+      - datanode
   hive-metastore:
     image: bde2020/hive:2.1.0-postgresql-metastore
     platform: linux/amd64
@@ -43,6 +48,9 @@ services:
     env_file:
       - ./hadoop-hive.env
     command: /opt/hive/bin/hive --service metastore
+    # ADD THIS BLOCK:
+    depends_on:
+      - hive-metastore-postgresql
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.1.0
     platform: linux/amd64
