@@ -17,6 +17,29 @@ services:
       - "9000:9000"   # HDFS
     env_file:
       - ./hadoop.env
+    entrypoint: >
+      bash -c '
+        echo "Checking NameNode metadata..."
+        if [ -f /hadoop/dfs/name/current/VERSION ]; then
+          echo "Existing HDFS metadata found. Checking version..."
+          grep -q "layoutVersion=-65" /hadoop/dfs/name/current/VERSION || {
+            echo "Old layout version found! Reformatting NameNode..."
+            rm -rf /hadoop/dfs/name/*
+            hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s)
+          }
+        else
+          echo "No existing NameNode data found. Formatting fresh NameNode..."
+          hdfs namenode -format -nonInteractive -force -clusterId CID-$(date +%s)
+        fi
+        /entrypoint.sh
+      '
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9870"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hadoop-net
 
   # -----------------------------
   # HDFS - DataNode
@@ -34,7 +57,15 @@ services:
     env_file:
       - ./hadoop.env
     depends_on:
-      - namenode
+      namenode:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9864"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hadoop-net
 
   # -----------------------------
   # PostgreSQL for Hive Metastore
@@ -51,6 +82,8 @@ services:
       - metastore-db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - hadoop-net
 
   # -----------------------------
   # Hive Metastore
@@ -68,9 +101,14 @@ services:
     ports:
       - "9083:9083"
     depends_on:
-      - namenode
-      - datanode
-      - hive-metastore-postgresql
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      hive-metastore-postgresql:
+        condition: service_started
+    networks:
+      - hadoop-net
 
   # -----------------------------
   # HiveServer2
@@ -89,11 +127,20 @@ services:
       - "10000:10000"  # JDBC
       - "10002:10002"  # Web UI
     depends_on:
-      - hive-metastore
-      - namenode
-      - datanode
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      hive-metastore:
+        condition: service_started
+    networks:
+      - hadoop-net
 
 volumes:
   namenode-data:
   datanode-data:
   metastore-db:
+
+networks:
+  hadoop-net:
+    driver: bridge
