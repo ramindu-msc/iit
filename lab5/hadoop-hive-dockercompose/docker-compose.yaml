@@ -1,155 +1,83 @@
-# docker-compose.yml
-version: "3.8"
-
+version: '2'
 services:
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    image: bde2020/hadoop-namenode:1.1.0-hadoop2.8-java8
     container_name: namenode
-    restart: always
-    ports:
-      - "9870:9870" # NameNode Web UI
-      - "9000:9000" # FS Default
+    platform: linux/amd64
     volumes:
-      - hadoop_namenode:/hadoop/dfs/name
-      - /home/iitgcpuser/iit/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
+      # - ./data/namenode:/hadoop/dfs/name
+      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
     environment:
       - CLUSTER_NAME=test
     env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-  datanode1:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode1
-    restart: always
-    depends_on:
-      - namenode
-    volumes:
-      - hadoop_datanode1:/hadoop/dfs/data
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870"
-    env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-  datanode2:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode2
-    restart: always
-    depends_on:
-      - namenode
-    volumes:
-      - hadoop_datanode2:/hadoop/dfs/data
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870"
-    env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-  resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
-    container_name: resourcemanager
-    restart: always
-    depends_on:
-      - namenode
-      - datanode1
-      - datanode2
+      - ./hadoop-hive.env
     ports:
-      - "8088:8088" # ResourceManager Web UI
-    environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode1:9864 datanode2:9864"
-    env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-  nodemanager1:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
-    container_name: nodemanager1
-    restart: always
+      - 50070:50070
+  datanode:
+    image: bde2020/hadoop-datanode:1.1.0-hadoop2.8-java8
+    platform: linux/amd64
     depends_on:
-      - resourcemanager
-    environment:
-      SERVICE_PRECONDITION: "resourcemanager:8088"
-    env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-  nodemanager2:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
-    container_name: nodemanager2
-    restart: always
-    depends_on:
-      - resourcemanager
-    environment:
-      SERVICE_PRECONDITION: "resourcemanager:8088"
-    env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-  hive-postgres:
-    image: postgres:9.6
-    container_name: hive-postgres
-    restart: always
-    volumes:
-      - hive_postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=hive
-      - POSTGRES_PASSWORD=hive
-      - POSTGRES_DB=metastore
-    networks:
-      - hadoop
-
-  hive-metastore:
-    image: vengleab/docker-hive:hive-hadoop-3.2.1-amd-only
-    container_name: hive-metastore
-    restart: always
-    depends_on:
-      - hive-postgres
       - namenode
-    ports:
-      - "9083:9083" # Metastore Thrift port
-    environment:
-      # This service just needs postgres and hadoop to be up
-      SERVICE_PRECONDITION: "hive-postgres:5432 namenode:9000"
-      # NO DATABASE CREDENTIALS HERE
+    # volumes:
+    #   - ./data/datanode:/hadoop/dfs/data
     env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-    # This command forces this container to run the *metastore* service
-    command: /opt/hive/bin/hive --service metastore
-
+      - ./hadoop-hive.env
+    ports:
+      - 50075:50075
   hive-server:
-    # 1. FIXED: Use the *same* Hadoop 3.2.1 compatible image
-    image: vengleab/docker-hive:hive-hadoop-3.2.1-amd-only
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    platform: linux/amd64
+    volumes:
+      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     container_name: hive-server
-    restart: always
-    depends_on:
-      - hive-metastore
-      - resourcemanager
-    ports:
-      - "10000:10000" # HiveServer2 Thrift port
-      - "10002:10002" # HiveServer2 Web UI
-    environment:
-      # This service waits for the metastore, which is now starting correctly
-      SERVICE_PRECONDITION: "hive-metastore:9083"
-      HIVE_CONF_hive_metastore_uris: "thrift://hive-metastore:9083"
-      # NO database credentials here. This breaks the race condition.
     env_file:
-      - ./hadoop.env
-    networks:
-      - hadoop
-
-volumes:
-  hadoop_namenode:
-  hadoop_datanode1:
-  hadoop_datanode2:
-  hive_postgres_data: # <-- Add this line
-
-networks:
-  hadoop:
+      - ./hadoop-hive.env
+    environment:
+      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
+    ports:
+      - "10000:10000"
+  hive-metastore:
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    platform: linux/amd64
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.1.0
+    platform: linux/amd64
+  spark-master:
+    image: bde2020/spark-master:2.1.0-hadoop2.8-hive-java8
+    container_name: spark-master
+    platform: linux/amd64
+    ports:
+      - 8080:8080
+      - 7077:7077
+    env_file:
+      - ./hadoop-hive.env
+  spark-worker:
+    image: bde2020/spark-worker:2.1.0-hadoop2.8-hive-java8
+    platform: linux/amd64
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./hadoop-hive.env
+  spark-notebook:
+    image: bde2020/spark-notebook:2.1.0-hadoop2.8-hive
+    platform: linux/amd64
+    container_name: spark-notebook
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - 9001:9001
+  hue:
+    image: bde2020/hdfs-filebrowser:3.11
+    platform: linux/amd64
+    ports:
+      - 8088:8088
+    environment:
+      - NAMENODE_HOST=namenode
