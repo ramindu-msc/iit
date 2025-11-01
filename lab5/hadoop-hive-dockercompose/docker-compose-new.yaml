@@ -77,6 +77,8 @@ services:
     container_name: hive-metastore-init
     # Removed env_file to prevent HDFS configuration conflict
     environment: # <-- FINAL CORRECT ENVIRONMENT VARIABLES
+      - HIVE_SITE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HIVE_SITE_CONF_hive_metastore_warehouse_dir=/user/hive/warehouse
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
@@ -136,6 +138,8 @@ services:
     platform: linux/amd64
     # Removed env_file to prevent HDFS configuration conflict
     environment: # <-- FINAL CORRECT ENVIRONMENT VARIABLES
+      - HIVE_SITE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HIVE_SITE_CONF_hive_metastore_warehouse_dir=/user/hive/warehouse
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
       - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
