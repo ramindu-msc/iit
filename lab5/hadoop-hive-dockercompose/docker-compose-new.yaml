@@ -15,7 +15,7 @@ services:
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/namenode:/hadoop/dfs/name
-      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
+#      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
     ports:
       - "50070:50070"                                     # <-- FIXED PORT
       - "8020:8020"
@@ -41,7 +41,7 @@ services:
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/datanode:/hadoop/dfs/data
-      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
+#      - ./hadoop_dir:/opt/hadoop-2.7.4/etc/hadoop        # <-- FIXED PATH
     depends_on:
       namenode:
         condition: service_healthy
