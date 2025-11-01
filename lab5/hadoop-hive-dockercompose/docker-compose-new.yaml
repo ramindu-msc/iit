@@ -37,7 +37,7 @@ services:
     env_file:
       - ./hadoop.env
     environment:
-      - SERVICE_PRECONDITION=namenode:9870
+      - SERVICE_PRECONDITION=namenode:8020
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
       - ./data_new/datanode:/hadoop/dfs/data
@@ -48,7 +48,7 @@ services:
     networks:
       - hadoop-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9864"]
+      test: [ "CMD", "hdfs", "dfsadmin", "-report" ]
       interval: 10s
       timeout: 5s
       retries: 20
