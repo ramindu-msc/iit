@@ -99,6 +99,8 @@ services:
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
+      namenode: # <-- ADDED HDFS DEPENDENCY
+        condition: service_healthy
     command: >
       bash -c "
       echo 'Starting Hive Metastore...';
@@ -108,6 +110,11 @@ services:
       - "9083:9083"
     networks:
       - hadoop-net
+    healthcheck: # <-- ADDED HEALTHCHECK
+      test: [ "CMD", "nc", "-z", "localhost", "9083" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 
   # -----------------------------
