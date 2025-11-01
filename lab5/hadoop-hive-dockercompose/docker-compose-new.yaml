@@ -99,7 +99,7 @@ services:
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
-      namenode: # <-- ADDED HDFS DEPENDENCY
+      namenode:
         condition: service_healthy
     command: >
       bash -c "
@@ -110,11 +110,6 @@ services:
       - "9083:9083"
     networks:
       - hadoop-net
-    healthcheck: # <-- ADDED HEALTHCHECK
-      test: ["CMD", "sh", "-c", "exec 6<>/dev/tcp/localhost/9083"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
 
   # -----------------------------
@@ -128,8 +123,8 @@ services:
       - ./hadoop.env
     depends_on:
       hive-metastore:
-        condition: service_healthy
-      namenode: # <-- ADD THIS DEPENDENCY
+        condition: service_started # <-- CHANGED from service_healthy
+      namenode:
         condition: service_healthy
     ports:
       - "10000:10000"
