@@ -6,7 +6,7 @@ services:
     platform: linux/amd64
     volumes:
       # - ./data/namenode:/hadoop/dfs/name
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -28,7 +28,7 @@ services:
     image: bde2020/hive:2.1.0-postgresql-metastore
     platform: linux/amd64
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
     container_name: hive-server
     env_file:
       - ./hadoop-hive.env
