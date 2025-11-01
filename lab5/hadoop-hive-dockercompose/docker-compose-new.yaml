@@ -99,10 +99,10 @@ services:
         condition: service_healthy
     command: >
       bash -c "
-      echo 'Waiting 30 seconds for HDFS to stabilize...';
-      sleep 30;
+      echo 'Waiting 60 seconds for HDFS to fully stabilize...';
+      sleep 60;  # <-- Increased to 60 seconds
       echo 'Starting Hive Metastore...';
-      exec /opt/hive/bin/hive --service metastore # <-- REMOVED gosu hive
+      exec /opt/hive/bin/hive --service metastore
       "
     ports:
       - "9083:9083"
@@ -119,7 +119,6 @@ services:
     platform: linux/amd64
     env_file:
       - ./hadoop.env
-    # Removed wait-for-it.sh volume and dependency logic
     depends_on:
       hive-metastore:
         condition: service_started
@@ -127,10 +126,10 @@ services:
         condition: service_healthy
     command: >
       bash -c "
-      echo 'Waiting 60 seconds for Metastore to stabilize...';
-      sleep 60;
+      echo 'Waiting 90 seconds for Metastore to stabilize...';
+      sleep 90;  # <-- Increased to 90 seconds
       echo 'Starting HiveServer2...';
-      exec /opt/hive/bin/hiveserver2 # <-- REMOVED gosu hive
+      exec /opt/hive/bin/hiveserver2
       "
     ports:
       - "10000:10000"
