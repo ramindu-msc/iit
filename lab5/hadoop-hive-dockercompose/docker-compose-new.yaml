@@ -12,7 +12,7 @@ services:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
     volumes:
-      - namenode-data:/hadoop/dfs/name
+      - ./data/namenode:/hadoop/dfs/name
       - ./namenode-entrypoint.sh:/namenode-entrypoint.sh:ro
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     ports:
@@ -39,7 +39,7 @@ services:
       - SERVICE_PRECONDITION=namenode:9870
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
     volumes:
-      - datanode-data:/hadoop/dfs/data
+      - ./data/datanode:/hadoop/dfs/data
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     depends_on:
       namenode:
