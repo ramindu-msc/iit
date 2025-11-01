@@ -32,12 +32,10 @@ services:
     container_name: hive-server
     env_file:
       - ./hadoop-hive.env
-    environment:
-      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore/metastore"
+    # REMOVE THE 'environment' BLOCK FROM HERE
     ports:
       - "10000:10000"
-    # ADD THIS BLOCK:
-    depends_on:
+    depends_on: # Keep this
       - hive-metastore
       - namenode
       - datanode
@@ -48,8 +46,10 @@ services:
     env_file:
       - ./hadoop-hive.env
     command: /opt/hive/bin/hive --service metastore
-    # ADD THIS BLOCK:
-    depends_on:
+    # ADD THIS ENVIRONMENT BLOCK:
+    environment:
+      - "HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql/metastore"
+    depends_on: # Keep this
       - hive-metastore-postgresql
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.1.0
