@@ -13,6 +13,7 @@ services:
     volumes:
       - namenode-data:/hadoop/dfs/name
       - ./namenode-entrypoint.sh:/namenode-entrypoint.sh:ro
+      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
     ports:
       - "9870:9870"   # Web UI
       - "9000:9000"   # HDFS
