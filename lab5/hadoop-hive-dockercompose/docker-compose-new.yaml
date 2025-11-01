@@ -118,6 +118,7 @@ services:
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName=hive
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword=hive
       - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore:9083
+      - HIVE_METASTORE_URI=thrift://hive-metastore:9083
     ports:
       - "10000:10000"  # JDBC
       - "10002:10002"  # Web UI
