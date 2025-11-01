@@ -75,9 +75,8 @@ services:
   hive-metastore-init:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore-init
-    # Removed env_file to prevent HDFS configuration conflict
     env_file:
-      - ./hadoop.env # <-- NOW RELYING ON THIS
+      - ./hadoop.env
     depends_on:
       hive-metastore-postgresql:
         condition: service_healthy
@@ -91,10 +90,8 @@ services:
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-metastore
-    # Removed env_file to prevent HDFS configuration conflict
     env_file:
-      - ./hadoop.env # <-- NOW RELYING ON THIS
-
+      - ./hadoop.env
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
@@ -104,8 +101,8 @@ services:
       bash -c "
       echo 'Waiting 30 seconds for HDFS to stabilize...';
       sleep 30;
-      echo 'Starting Hive Metastore...';
-      exec /opt/hive/bin/hive --service metastore
+      echo 'Starting Hive Metastore as user hive...';
+      exec gosu hive /opt/hive/bin/hive --service metastore  # <-- USER SWITCH APPLIED
       "
     ports:
       - "9083:9083"
@@ -120,18 +117,21 @@ services:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-server
     platform: linux/amd64
-    # Removed env_file to prevent HDFS configuration conflict
     env_file:
-      - ./hadoop.env # <-- NOW RELYING ON THIS
-    volumes:
-      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh
+      - ./hadoop.env
+    # Removed wait-for-it.sh volume and dependency logic
     depends_on:
       hive-metastore:
         condition: service_started
       namenode:
         condition: service_healthy
     command: >
-      bash -c "/usr/local/bin/wait-for-it.sh hive-metastore 9083 -- /opt/hive/bin/hiveserver2"
+      bash -c "
+      echo 'Waiting 60 seconds for Metastore to stabilize...';
+      sleep 60;
+      echo 'Starting HiveServer2 as user hive...';
+      exec gosu hive /opt/hive/bin/hiveserver2 # <-- USER SWITCH APPLIED
+      "
     ports:
       - "10000:10000"
     networks:
