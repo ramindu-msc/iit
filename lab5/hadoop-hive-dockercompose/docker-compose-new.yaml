@@ -9,7 +9,7 @@ services:
     container_name: namenode
     restart: always
     env_file:
-      - ./hadoop-hive.env
+      - ./hadoop.env
     environment:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
@@ -38,7 +38,7 @@ services:
     container_name: datanode
     restart: always
     env_file:
-      - ./hadoop-hive.env
+      - ./hadoop.env
     environment:
       - SERVICE_PRECONDITION=namenode:9870
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:9000
@@ -64,7 +64,7 @@ services:
     container_name: hive-metastore-postgresql
     restart: always
     env_file:
-      - ./hadoop-hive.env
+      - ./hadoop.env
     environment:
       POSTGRES_USER: hive
       POSTGRES_PASSWORD: hive
@@ -84,7 +84,7 @@ services:
     container_name: hive-metastore
     restart: always
     env_file:
-      - ./hadoop-hive.env
+      - ./hadoop.env
     environment:
       - HIVE_METASTORE_DB_HOST=hive-metastore-postgresql
       - HIVE_METASTORE_DB_NAME=metastore
@@ -111,7 +111,7 @@ services:
     container_name: hive-server
     restart: always
     env_file:
-      - ./hadoop-hive.env
+      - ./hadoop.env
     environment:
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
       - HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
