@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # -----------------------------
-  # HDFS NameNode
+  # HDFS - NameNode
   # -----------------------------
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -29,7 +29,7 @@ services:
       retries: 20
 
   # -----------------------------
-  # HDFS DataNode
+  # HDFS - DataNode
   # -----------------------------
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -55,7 +55,7 @@ services:
       retries: 20
 
   # -----------------------------
-  # Hive Metastore PostgreSQL
+  # PostgreSQL for Hive Metastore
   # -----------------------------
   hive-metastore-postgresql:
     image: postgres:14
@@ -72,12 +72,13 @@ services:
     networks:
       - hadoop-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hive -d metastore"]
+      test: ["CMD-SHELL", "pg_isready -U hive"]
       interval: 5s
       retries: 20
+      timeout: 5s
 
   # -----------------------------
-  # Hive Metastore (auto-initializes schema)
+  # Hive Metastore
   # -----------------------------
   hive-metastore:
     image: bde2020/hive:2.1.0-postgresql-metastore
@@ -104,7 +105,6 @@ services:
     networks:
       - hadoop-net
 
-
   # -----------------------------
   # HiveServer2
   # -----------------------------
@@ -115,9 +115,8 @@ services:
     env_file:
       - ./hadoop.env
     depends_on:
-      - hive-metastore
-    volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
+      hive-metastore:
+        condition: service_healthy
     ports:
       - "10000:10000"
     networks:
