@@ -23,16 +23,16 @@ services:
       - "8020:8020"
     entrypoint: [ "/namenode-entrypoint.sh" ]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9870" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9870"]
       interval: 10s
       timeout: 5s
       retries: 20
     networks:
       - hadoop-net
 
-    # -----------------------------
-    # HDFS - DataNode
-    # -----------------------------
+  # -----------------------------
+  # HDFS - DataNode
+  # -----------------------------
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
@@ -75,6 +75,11 @@ services:
       - "5432:5432"
     networks:
       - hadoop-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   # -----------------------------
   # Hive Metastore
@@ -92,14 +97,19 @@ services:
       - HIVE_METASTORE_DB_PASS=hive
       - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore-postgresql:5432
     ports:
-      - "9083:9083"
+      - "9083:9083"  # Thrift URI
     depends_on:
       namenode:
         condition: service_healthy
       datanode:
         condition: service_healthy
       hive-metastore-postgresql:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9083"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
     networks:
       - hadoop-net
 
@@ -113,12 +123,9 @@ services:
     env_file:
       - ./hadoop.env
     environment:
-      - HIVE_CORE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://hive-metastore-postgresql:5432/metastore
-      - HIVE_CORE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
-      - HIVE_CORE_CONF_javax_jdo_option_ConnectionUserName=hive
-      - HIVE_CORE_CONF_javax_jdo_option_ConnectionPassword=hive
-      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore:9083
+      # Connect HiveServer2 to Hive Metastore Thrift service
       - HIVE_METASTORE_URI=thrift://hive-metastore:9083
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 hive-metastore:9083
     ports:
       - "10000:10000"  # JDBC
       - "10002:10002"  # Web UI
@@ -128,7 +135,7 @@ services:
       datanode:
         condition: service_healthy
       hive-metastore:
-        condition: service_started
+        condition: service_healthy
     networks:
       - hadoop-net
 
