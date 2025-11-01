@@ -111,7 +111,7 @@ services:
     networks:
       - hadoop-net
     healthcheck: # <-- ADDED HEALTHCHECK
-      test: [ "CMD", "nc", "-z", "localhost", "9083" ]
+      test: ["CMD", "sh", "-c", "exec 6<>/dev/tcp/localhost/9083"]
       interval: 10s
       timeout: 5s
       retries: 10
