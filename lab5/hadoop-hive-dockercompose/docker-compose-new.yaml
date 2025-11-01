@@ -53,6 +53,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+  hive-metastore-init:
+    image: bde2020/hive:2.1.0-postgresql-metastore
+    platform: linux/amd64
+    container_name: hive-metastore-init
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - hive-metastore-postgresql
+    command: >
+      /opt/hive/bin/schematool -dbType postgres -initSchema
 
   hive-server:
     image: bde2020/hive:2.1.0-postgresql-metastore
