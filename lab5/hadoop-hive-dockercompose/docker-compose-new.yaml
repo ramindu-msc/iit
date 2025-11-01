@@ -96,9 +96,9 @@ services:
           sleep 2;
       done;
       echo 'PostgreSQL ready. Initializing schema...';
-      schematool -dbType postgres -initSchema;
+      schematool -dbType postgres -initSchema -verbose;
       echo 'Starting Hive Metastore...';
-      /opt/hive/bin/hive --service metastore
+      exec /opt/hive/bin/hive --service metastore
       "
     ports:
       - "9083:9083"
