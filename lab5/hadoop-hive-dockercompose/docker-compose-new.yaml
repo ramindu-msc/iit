@@ -78,7 +78,38 @@ services:
       retries: 20
 
   # -----------------------------
-  # Hive Metastore
+  # Hive Metastore (Schema Initialization)
+  # -----------------------------
+  hive-metastore-init:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore-init
+    restart: "no"
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+    entrypoint:
+      [
+        "/wait-for-it.sh",
+        "hive-metastore-postgresql",
+        "5432",
+        "--",
+        "/opt/hive/bin/schematool",
+        "-dbType", "postgres",
+        "-url", "jdbc:postgresql://hive-metastore-postgresql:5432/metastore",
+        "-user", "hive",
+        "-pass", "hive",
+        "-initSchema"
+      ]
+    depends_on:
+      hive-metastore-postgresql:
+        condition: service_healthy
+    networks:
+      - hadoop-net
+
+  # -----------------------------
+  # Hive Metastore (Service)
   # -----------------------------
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -94,14 +125,25 @@ services:
     volumes:
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
       - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint: [ "/wait-for-it.sh", "hive-metastore-postgresql", "5432", "--", "/opt/hive/bin/schematool", "-dbType", "postgres", "-initSchema" ]
+    entrypoint:
+      [
+        "/wait-for-it.sh",
+        "hive-metastore-postgresql",
+        "5432",
+        "--",
+        "/opt/hive/bin/hive",
+        "--service",
+        "metastore"
+      ]
     depends_on:
       namenode:
         condition: service_healthy
       datanode:
         condition: service_healthy
-      hive-metastore-postgresql:
-        condition: service_healthy
+      hive-metastore-init:
+        condition: service_completed_successfully
+    ports:
+      - "9083:9083"
     networks:
       - hadoop-net
 
@@ -119,14 +161,21 @@ services:
     volumes:
       - ./hadoop_dir:/opt/hadoop-3.2.1/etc/hadoop
       - ./wait-for-it.sh:/wait-for-it.sh:ro
-    entrypoint: [ "/wait-for-it.sh", "hive-metastore", "9083", "--", "/opt/hive/bin/hiveserver2" ]
+    entrypoint:
+      [
+        "/wait-for-it.sh",
+        "hive-metastore",
+        "9083",
+        "--",
+        "/opt/hive/bin/hiveserver2"
+      ]
     depends_on:
       namenode:
         condition: service_healthy
       datanode:
         condition: service_healthy
       hive-metastore:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "10000:10000"
       - "10002:10002"
