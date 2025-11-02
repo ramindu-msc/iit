@@ -5,7 +5,7 @@ services:
   # HDFS - NameNode (Hadoop 2.7.4)
   # -----------------------------
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    image: ramilu90/hive-namenode:1.0.0
     container_name: namenode
     restart: always
     env_file:
@@ -31,7 +31,7 @@ services:
   # HDFS - DataNode (Hadoop 2.7.4)
   # -----------------------------
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    image: ramilu90/hive-datanode:1.0.0
     container_name: datanode
     restart: always
     env_file:
@@ -51,7 +51,7 @@ services:
   # PostgreSQL for Hive Metastore
   # -----------------------------
   hive-metastore-postgresql:
-    image: postgres:12
+    image: ramilu90/hive-metastore-postgresql:1.0.0
     container_name: hive-metastore-postgresql
     restart: always
     environment:
@@ -74,7 +74,7 @@ services:
   # Hive Metastore Schema Initialization
   # -----------------------------
   hive-metastore-init:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: ramilu90/hive-metastore-init:1.0.0
     container_name: hive-metastore-init
     env_file:
       - ./hadoop.env
@@ -89,7 +89,7 @@ services:
 
 
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: ramilu90/hive-metastore:1.0.0
     container_name: hive-metastore
     env_file:
       - ./hadoop.env
@@ -114,7 +114,7 @@ services:
     # HiveServer2
     # -----------------------------
   hive-server: # <-- ENSURE THIS IS ALIGNED WITH 'hive-metastore'
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: bramilu90/hive-server:1.0.0
     container_name: hive-server
     platform: linux/amd64
     volumes:
