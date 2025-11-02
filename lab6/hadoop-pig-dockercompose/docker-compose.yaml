@@ -5,8 +5,8 @@ services:
     container_name: namenode
     platform: linux/amd64
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/friends-mapreduce.txt:/opt/friends-mapreduce.txt
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/resources:/opt/hadoop/resources
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/friends-mapreduce.txt:/opt/friends-mapreduce.txt
+      - /home/iitgcpuser/iit/lab6//resources:/opt/hadoop/resources
     environment:
       - CLUSTER_NAME=test
     env_file:
