@@ -14,7 +14,7 @@ services:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.inputvolumes
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.inputvolumes
       - ./data_new/namenode:/hadoop/dfs/name
     ports:
       - "50070:50070"
@@ -118,7 +118,7 @@ services:
     container_name: hive-server
     platform: linux/amd64
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
     env_file:
       - ./hadoop.env
     environment: # Added for HDFS client stability
