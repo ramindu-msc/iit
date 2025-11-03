@@ -14,7 +14,7 @@ services:
       - CLUSTER_NAME=hadoop-cluster
       - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
     volumes:
-      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.inputvolumes
+      - /home/iitgcpuser/iit/lab5/hadoop-hive-dockercompose/recharge2.input:/opt/recharge2.input
       - ./data_new/namenode:/hadoop/dfs/name
     ports:
       - "50070:50070"
