@@ -57,12 +57,12 @@ services:
       - PIG_CONF_DIR=/opt/pig/conf
       - HADOOP_CONF_DIR=/etc/hadoop/conf
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-hive-dockercompose/recharge.input:/opt/recharge.input
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/l_get_friends.pig:/opt/l_get_friends.pig
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/friends.txt:/opt/friends.txt
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/piggybank-0.16.0.jar:/opt/piggybank-0.16.0.jar
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/l_get_friends_mapreduce.pig:/opt/l_get_friends_mapreduce.pig
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/wordcount.pig:/opt/wordcount.pig
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/pig_conf:/opt/pig/conf/
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-pig-dockercompose/hadoop_conf:/etc/hadoop/conf 
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/recharge.input:/opt/recharge.input
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/l_get_friends.pig:/opt/l_get_friends.pig
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/friends.txt:/opt/friends.txt
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/piggybank-0.16.0.jar:/opt/piggybank-0.16.0.jar
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/l_get_friends_mapreduce.pig:/opt/l_get_friends_mapreduce.pig
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/wordcount.pig:/opt/wordcount.pig
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/pig_conf:/opt/pig/conf/
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/hadoop_conf:/etc/hadoop/conf 
     command: tail -f /dev/null
