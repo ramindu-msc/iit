@@ -59,7 +59,7 @@ services:
       POSTGRES_PASSWORD: hive
       POSTGRES_DB: metastore
     volumes:
-      - metastore-db:/var/lib/postgresql/data
+      - metastore-db2:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
@@ -135,7 +135,7 @@ services:
       - hadoop-net
 
 volumes:
-  metastore-db:
+  metastore-db2:
 
 networks:
   hadoop-net:
