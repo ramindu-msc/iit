@@ -6,7 +6,7 @@ services:
     platform: linux/amd64
     volumes:
       - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/friends-mapreduce.txt:/opt/friends-mapreduce.txt
-      - /home/iitgcpuser/iit/lab6//resources:/opt/hadoop/resources
+      - /home/iitgcpuser/iit/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
     environment:
       - CLUSTER_NAME=test
     env_file:
