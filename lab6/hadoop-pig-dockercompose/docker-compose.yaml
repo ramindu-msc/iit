@@ -7,6 +7,7 @@ services:
     volumes:
       - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/friends-mapreduce.txt:/opt/friends-mapreduce.txt
       - /home/iitgcpuser/iit/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
+      - /home/iitgcpuser/iit/lab6/hadoop-pig-dockercompose/piggybank-0.16.0.jar:/opt/piggybank-0.16.0.jar
     environment:
       - CLUSTER_NAME=test
     env_file:
