@@ -5,7 +5,7 @@ DEFINE MyXMLLoader org.apache.pig.piggybank.storage.XMLLoader();
 
 -- Load the XML file using the defined XMLLoader
 comments = LOAD '/user/test/stackapps.com/comments/Comments2.xml'
-    USING org.apache.pig.piggybank.storage.XMLLoader(
+    USING org.apache.pig.piggybank.storage.XMLLoader2(
         'Id:int,PostId:int,Score:int,Text:chararray,CreationDate:chararray,UserId:int'
     );
     
