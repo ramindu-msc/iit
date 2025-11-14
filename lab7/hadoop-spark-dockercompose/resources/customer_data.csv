@@ -1,0 +1,11 @@
+age,gender,monthly_spending,service_usage,churn
+45,Male,150,120,1
+32,Female,85,75,0
+60,Male,200,140,1
+22,Female,40,20,0
+54,Male,130,90,0
+39,Female,110,80,1
+29,Female,95,60,0
+42,Male,170,130,1
+33,Female,100,70,0
+50,Male,180,150,1

@@ -1,0 +1,25 @@
+<configuration>
+  <!-- Replication Factor -->
+  <property>
+    <name>dfs.replication</name>
+    <value>0</value>
+  </property>
+
+  <!-- NameNode RPC Address -->
+  <property>
+    <name>dfs.namenode.rpc-address</name>
+    <value>namenode:8020</value>
+  </property>
+
+  <!-- Permissions -->
+  <property>
+    <name>dfs.permissions.enabled</name>
+    <value>false</value>
+  </property>
+
+  <!-- DataNode WebHDFS HTTP Address -->
+  <property>
+    <name>dfs.datanode.address</name>
+    <value>datanode:9866</value>
+  </property>
+</configuration>
