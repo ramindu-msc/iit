@@ -11,8 +11,8 @@ services:
       - 9010:9000
     volumes:
       # - hadoop_namenode:/hadoop/dfs/name
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/resources:/opt/hadoop/resources
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-spark-dockercompose/resources/:/opt/resources
+      - /home/iitgcpuser/iit/lab3_4_map_reduce/mapreduce-design-patterns/src/main/resources:/opt/hadoop/resources
+      - /home/iitgcpuser/iit/lab7/hadoop-spark-dockercompose/resources/:/opt/resources
     environment:
       - CLUSTER_NAME=test
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
@@ -59,7 +59,7 @@ services:
     container_name: spark-master
     platform: linux/amd64
     volumes:
-      - /Users/ramindu/iit/lecture4/mapreduce-design-intro/hadoop-spark-dockercompose/resources/:/opt/resources
+      - /home/iitgcpuser/iit/lab7/hadoop-spark-dockercompose/resources/:/opt/resources
     depends_on:
       - namenode
       - datanode
