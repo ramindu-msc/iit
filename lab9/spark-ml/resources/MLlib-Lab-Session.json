@@ -1,0 +1,2165 @@
+{
+    "paragraphs": [
+      {
+        "text": "%md \n# Estimator, Transformer, and Param",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:37:05+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225369_-1504763943",
+        "id": "20161129-012735_1377582462",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "status": "READY",
+        "focus": true,
+        "$$hashKey": "object:215114"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml.linalg import Vectors\nfrom pyspark.ml.classification import LogisticRegression\n\n# Prepare training data from a list of (label, features) tuples.\ntraining = spark.createDataFrame([\n    (1.0, Vectors.dense([0.0, 1.1, 0.1])),\n    (0.0, Vectors.dense([2.0, 1.0, -1.0])),\n    (0.0, Vectors.dense([2.0, 1.3, 1.0])),\n    (1.0, Vectors.dense([0.0, 1.2, -0.5]))], [\"label\", \"features\"])\n\n# Create a LogisticRegression instance. This instance is an Estimator.\nlr = LogisticRegression(maxIter=10, regParam=0.01)\n# Print out the parameters, documentation, and any default values.\nprint (\"LogisticRegression parameters\")\n\n# Learn a LogisticRegression model. This uses the parameters stored in lr.\nmodel1 = lr.fit(training)\n\n# Since model1 is a Model (i.e., a transformer produced by an Estimator),\n# we can view the parameters it used during fit().\n# This prints the parameter (name: value) pairs, where names are unique IDs for this\n# LogisticRegression instance.\nprint (\"Model 1 was fit using parameters: \")\nprint (model1.extractParamMap)\n\n# We may alternatively specify parameters using a Python dictionary as a paramMap\nparamMap = {lr.maxIter: 20}\nparamMap[lr.maxIter] = 30  # Specify 1 Param, overwriting the original maxIter.\nparamMap.update({lr.regParam: 0.1, lr.threshold: 0.55})  # Specify multiple Params.\n\n# You can combine paramMaps, which are python dictionaries.\nparamMap2 = {lr.probabilityCol: \"myProbability\"}  # Change output column name\nparamMapCombined = paramMap.copy()\nparamMapCombined.update(paramMap2)\n\n# Now learn a new model using the paramMapCombined parameters.\n# paramMapCombined overrides all parameters set earlier via lr.set* methods.\nmodel2 = lr.fit(training, paramMapCombined)\nprint (\"Model 2 was fit using parameters: \")\nprint (model2.extractParamMap)\n\n# Prepare test data\ntest = spark.createDataFrame([\n    (1.0, Vectors.dense([-1.0, 1.5, 1.3])),\n    (0.0, Vectors.dense([3.0, 2.0, -0.1])),\n    (1.0, Vectors.dense([0.0, 2.2, -1.5]))], [\"label\", \"features\"])\n\n# Make predictions on test data using the Transformer.transform() method.\n# LogisticRegression.transform will only use the 'features' column.\n# Note that model2.transform() outputs a \"myProbability\" column instead of the usual\n# 'probability' column since we renamed the lr.probabilityCol parameter previously.\nprediction = model2.transform(test)\nselected = prediction.select(\"features\", \"label\", \"myProbability\", \"prediction\")\nfor row in selected.collect():\n    print (row)",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:53:46+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=320",
+                "$$hashKey": "object:215675"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=321",
+                "$$hashKey": "object:215676"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=322",
+                "$$hashKey": "object:215677"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=323",
+                "$$hashKey": "object:215678"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=324",
+                "$$hashKey": "object:215679"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=325",
+                "$$hashKey": "object:215680"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=326",
+                "$$hashKey": "object:215681"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=327",
+                "$$hashKey": "object:215682"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=328",
+                "$$hashKey": "object:215683"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=329",
+                "$$hashKey": "object:215684"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=330",
+                "$$hashKey": "object:215685"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=331",
+                "$$hashKey": "object:215686"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=332",
+                "$$hashKey": "object:215687"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=333",
+                "$$hashKey": "object:215688"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=334",
+                "$$hashKey": "object:215689"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=335",
+                "$$hashKey": "object:215690"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=336",
+                "$$hashKey": "object:215691"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=337",
+                "$$hashKey": "object:215692"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=338",
+                "$$hashKey": "object:215693"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=339",
+                "$$hashKey": "object:215694"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=340",
+                "$$hashKey": "object:215695"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=341",
+                "$$hashKey": "object:215696"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=342",
+                "$$hashKey": "object:215697"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=343",
+                "$$hashKey": "object:215698"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=344",
+                "$$hashKey": "object:215699"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=345",
+                "$$hashKey": "object:215700"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=346",
+                "$$hashKey": "object:215701"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=347",
+                "$$hashKey": "object:215702"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=348",
+                "$$hashKey": "object:215703"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=349",
+                "$$hashKey": "object:215704"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=350",
+                "$$hashKey": "object:215705"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=351",
+                "$$hashKey": "object:215706"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=352",
+                "$$hashKey": "object:215707"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=353",
+                "$$hashKey": "object:215708"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=354",
+                "$$hashKey": "object:215709"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=355",
+                "$$hashKey": "object:215710"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=356",
+                "$$hashKey": "object:215711"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=357",
+                "$$hashKey": "object:215712"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=358",
+                "$$hashKey": "object:215713"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=359",
+                "$$hashKey": "object:215714"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=360",
+                "$$hashKey": "object:215715"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=361",
+                "$$hashKey": "object:215716"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=362",
+                "$$hashKey": "object:215717"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225372_1062527319",
+        "id": "20161129-012748_52787394",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:53:46+0000",
+        "dateFinished": "2020-11-30T11:53:48+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215115"
+      },
+      {
+        "text": "%md\n\n# Extracting, transforming and selecting features\n\n## CountVectorizer\n",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:53:59+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "text",
+            "editOnDblClick": false,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/text",
+          "fontSize": 9,
+          "editorHide": false,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225373_42289075",
+        "id": "20161129-013007_1388002982",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:53:59+0000",
+        "dateFinished": "2020-11-30T11:53:59+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215116"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml.feature import CountVectorizer\n\n# Input data: Each row is a bag of words with a ID.\ndf = spark.createDataFrame([\n    (0, \"a b c\".split(\" \")),\n    (1, \"a b b c a\".split(\" \"))\n], [\"id\", \"words\"])\n\n# fit a CountVectorizerModel from the corpus.\ncv = CountVectorizer(inputCol=\"words\", outputCol=\"features\", vocabSize=3, minDF=2.0)\nmodel = cv.fit(df)\nresult = model.transform(df)\nresult.show()",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:00+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=363",
+                "$$hashKey": "object:215975"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=364",
+                "$$hashKey": "object:215976"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=365",
+                "$$hashKey": "object:215977"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225373_625878192",
+        "id": "20161129-013020_1764358722",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:00+0000",
+        "dateFinished": "2020-11-30T11:54:01+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215117"
+      },
+      {
+        "text": "%md\n\n## Feature Transformers : Tokenizer",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:37:05+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": {},
+          "graph": {
+            "mode": "table",
+            "height": 300,
+            "optionOpen": false,
+            "keys": [],
+            "values": [],
+            "groups": [],
+            "scatter": {}
+          },
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225373_-539328162",
+        "id": "20161129-013707_1456126627",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "status": "READY",
+        "$$hashKey": "object:215118"
+      },
+      {
+        "text": "%pyspark \n\nfrom pyspark.ml.feature import Tokenizer, RegexTokenizer\n\nsentenceDataFrame = spark.createDataFrame([\n    (0, \"Hi I heard about Spark\"),\n    (1, \"I wish Java could use case classes\"),\n    (2, \"Logistic,regression,models,are,neat\")\n], [\"label\", \"sentence\"])\ntokenizer = Tokenizer(inputCol=\"sentence\", outputCol=\"words\")\nwordsDataFrame = tokenizer.transform(sentenceDataFrame)\nfor words_label in wordsDataFrame.select(\"words\", \"label\").take(3):\n    print(words_label)\nregexTokenizer = RegexTokenizer(inputCol=\"sentence\", outputCol=\"words\", pattern=\"\\\\W\")\n# alternatively, pattern=\"\\\\w+\", gaps(False)",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:03+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=366",
+                "$$hashKey": "object:216073"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225374_-369801536",
+        "id": "20161129-013723_581839226",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:03+0000",
+        "dateFinished": "2020-11-30T11:54:03+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215119"
+      },
+      {
+        "text": "%md \n## Feature Selectors: VectorSlicer",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:37:05+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225374_1269481267",
+        "id": "20161129-013842_1827572139",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "status": "READY",
+        "$$hashKey": "object:215120"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml.feature import VectorSlicer\nfrom pyspark.ml.linalg import Vectors\nfrom pyspark.sql.types import Row\n\ndf = spark.createDataFrame([\n    Row(userFeatures=Vectors.sparse(3, {0: -2.0, 1: 2.3}),),\n    Row(userFeatures=Vectors.dense([-2.0, 2.3, 0.0]),)])\n\nslicer = VectorSlicer(inputCol=\"userFeatures\", outputCol=\"features\", indices=[1])\n\noutput = slicer.transform(df)\n\noutput.select(\"userFeatures\", \"features\").show()",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:09+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=367",
+                "$$hashKey": "object:216161"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225374_-1614509257",
+        "id": "20161129-013858_179930977",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:09+0000",
+        "dateFinished": "2020-11-30T11:54:09+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215121"
+      },
+      {
+        "text": "%md\n\n# Classification",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:15+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225374_-538404588",
+        "id": "20161129-005933_456191674",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:15+0000",
+        "dateFinished": "2020-11-30T11:54:15+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215122"
+      },
+      {
+        "text": "%md\n\n## Logistic regression\nLogistic regression is a popular method to predict a binary response. It is a special case of Generalized Linear models that predicts the probability of the outcome.",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:14+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225375_-177140086",
+        "id": "20161129-010017_1506647346",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:14+0000",
+        "dateFinished": "2020-11-30T11:54:14+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215123"
+      },
+      {
+        "text": "%pyspark \n\n#The following example shows how to train a logistic regression model with elastic net regularization\n\nfrom pyspark.ml.classification import LogisticRegression\n\n# Load training data\ntraining = spark.read.format(\"libsvm\").load(\"/data/mllib/sample_libsvm_data.txt\")\n\nlr = LogisticRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8)\n\n# Fit the model\nlrModel = lr.fit(training)\n\n# Print the coefficients and intercept for logistic regression\nprint(\"Coefficients: \" + str(lrModel.coefficients))\nprint(\"Intercept: \" + str(lrModel.intercept))\n",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:17+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=368",
+                "$$hashKey": "object:216289"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=369",
+                "$$hashKey": "object:216290"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=370",
+                "$$hashKey": "object:216291"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=371",
+                "$$hashKey": "object:216292"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=372",
+                "$$hashKey": "object:216293"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=373",
+                "$$hashKey": "object:216294"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=374",
+                "$$hashKey": "object:216295"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=375",
+                "$$hashKey": "object:216296"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=376",
+                "$$hashKey": "object:216297"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=377",
+                "$$hashKey": "object:216298"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=378",
+                "$$hashKey": "object:216299"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=379",
+                "$$hashKey": "object:216300"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=380",
+                "$$hashKey": "object:216301"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=381",
+                "$$hashKey": "object:216302"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=382",
+                "$$hashKey": "object:216303"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=383",
+                "$$hashKey": "object:216304"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225375_145684786",
+        "id": "20161129-010106_1160729799",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:17+0000",
+        "dateFinished": "2020-11-30T11:54:18+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215124"
+      },
+      {
+        "text": "%md \n# Decision tree classifier\n",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:21+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225375_775752799",
+        "id": "20161129-010330_366107409",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:21+0000",
+        "dateFinished": "2020-11-30T11:54:21+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215125"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml import Pipeline\nfrom pyspark.ml.classification import DecisionTreeClassifier\nfrom pyspark.ml.feature import StringIndexer, VectorIndexer\nfrom pyspark.ml.evaluation import MulticlassClassificationEvaluator\n\n# Load the data stored in LIBSVM format as a DataFrame.\ndata = spark.read.format(\"libsvm\").load(\"/data/mllib/sample_libsvm_data.txt\")\n\n# Index labels, adding metadata to the label column.\n# Fit on whole dataset to include all labels in index.\nlabelIndexer = StringIndexer(inputCol=\"label\", outputCol=\"indexedLabel\").fit(data)\n# Automatically identify categorical features, and index them.\n# We specify maxCategories so features with > 4 distinct values are treated as continuous.\nfeatureIndexer =\\\n    VectorIndexer(inputCol=\"features\", outputCol=\"indexedFeatures\", maxCategories=4).fit(data)\n\n# Split the data into training and test sets (30% held out for testing)\n(trainingData, testData) = data.randomSplit([0.7, 0.3])\n\n# Train a DecisionTree model.\ndt = DecisionTreeClassifier(labelCol=\"indexedLabel\", featuresCol=\"indexedFeatures\")\n\n# Chain indexers and tree in a Pipeline\npipeline = Pipeline(stages=[labelIndexer, featureIndexer, dt])\n\n# Train model.  This also runs the indexers.\nmodel = pipeline.fit(trainingData)\n\n# Make predictions.\npredictions = model.transform(testData)\n\n# Select example rows to display.\npredictions.select(\"prediction\", \"indexedLabel\", \"features\").show(5)\n\n# Select (prediction, true label) and compute test error\nevaluator = MulticlassClassificationEvaluator(\n    labelCol=\"indexedLabel\", predictionCol=\"prediction\", metricName=\"accuracy\")\naccuracy = evaluator.evaluate(predictions)\nprint(\"Test Error = %g \" % (1.0 - accuracy))\n\ntreeModel = model.stages[2]\n# summary only\nprint(treeModel)",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:23+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=384",
+                "$$hashKey": "object:216452"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=385",
+                "$$hashKey": "object:216453"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=386",
+                "$$hashKey": "object:216454"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=387",
+                "$$hashKey": "object:216455"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=388",
+                "$$hashKey": "object:216456"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=389",
+                "$$hashKey": "object:216457"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=390",
+                "$$hashKey": "object:216458"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=391",
+                "$$hashKey": "object:216459"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=392",
+                "$$hashKey": "object:216460"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=393",
+                "$$hashKey": "object:216461"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=394",
+                "$$hashKey": "object:216462"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=395",
+                "$$hashKey": "object:216463"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225375_-488545855",
+        "id": "20161129-010551_944142688",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:23+0000",
+        "dateFinished": "2020-11-30T11:54:25+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215126"
+      },
+      {
+        "text": "%md\n# Regression\n\n## Random forest regression",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:29+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225376_-1056522653",
+        "id": "20161129-010635_572224039",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:29+0000",
+        "dateFinished": "2020-11-30T11:54:29+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215127"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml import Pipeline\nfrom pyspark.ml.regression import RandomForestRegressor\nfrom pyspark.ml.feature import VectorIndexer\nfrom pyspark.ml.evaluation import RegressionEvaluator\n\n# Load and parse the data file, converting it to a DataFrame.\ndata = spark.read.format(\"libsvm\").load(\"/data/mllib/sample_libsvm_data.txt\")\n\n# Automatically identify categorical features, and index them.\n# Set maxCategories so features with > 4 distinct values are treated as continuous.\nfeatureIndexer =\\\n    VectorIndexer(inputCol=\"features\", outputCol=\"indexedFeatures\", maxCategories=4).fit(data)\n\n# Split the data into training and test sets (30% held out for testing)\n(trainingData, testData) = data.randomSplit([0.7, 0.3])\n\n# Train a RandomForest model.\nrf = RandomForestRegressor(featuresCol=\"indexedFeatures\")\n\n# Chain indexer and forest in a Pipeline\npipeline = Pipeline(stages=[featureIndexer, rf])\n\n# Train model.  This also runs the indexer.\nmodel = pipeline.fit(trainingData)\n\n# Make predictions.\npredictions = model.transform(testData)\n\n# Select example rows to display.\npredictions.select(\"prediction\", \"label\", \"features\").show(5)\n\n# Select (prediction, true label) and compute test error\nevaluator = RegressionEvaluator(\n    labelCol=\"label\", predictionCol=\"prediction\", metricName=\"rmse\")\nrmse = evaluator.evaluate(predictions)\nprint(\"Root Mean Squared Error (RMSE) on test data = %g\" % rmse)\n\nrfModel = model.stages[1]\nprint(rfModel)  # summary only",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:32+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=396",
+                "$$hashKey": "object:216595"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=397",
+                "$$hashKey": "object:216596"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=398",
+                "$$hashKey": "object:216597"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=399",
+                "$$hashKey": "object:216598"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=400",
+                "$$hashKey": "object:216599"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=401",
+                "$$hashKey": "object:216600"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=402",
+                "$$hashKey": "object:216601"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=403",
+                "$$hashKey": "object:216602"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=404",
+                "$$hashKey": "object:216603"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=405",
+                "$$hashKey": "object:216604"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=406",
+                "$$hashKey": "object:216605"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225376_516793414",
+        "id": "20161129-011540_1646360459",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:32+0000",
+        "dateFinished": "2020-11-30T11:54:34+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215128"
+      },
+      {
+        "text": "%md\n\n# Clustering\n\n## K-means",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:38+0000",
+        "config": {
+          "editorSetting": {
+            "language": "text",
+            "editOnDblClick": false,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/text",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true,
+          "editorHide": false,
+          "tableHide": false
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225376_218031637",
+        "id": "20161129-011600_996178656",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:38+0000",
+        "dateFinished": "2020-11-30T11:54:38+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215129"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml.clustering import KMeans\n\n# Loads data.\ndataset = spark.read.format(\"libsvm\").load(\"/data/mllib/sample_kmeans_data.txt\")\n\n# Trains a k-means model.\nkmeans = KMeans().setK(2).setSeed(1)\nmodel = kmeans.fit(dataset)\n\n# Evaluate clustering by computing Within Set Sum of Squared Errors.\nwssse = model.computeCost(dataset)\nprint(\"Within Set Sum of Squared Errors = \" + str(wssse))\n\n# Shows the result.\ncenters = model.clusterCenters()\nprint(\"Cluster Centers: \")\nfor center in centers:\n    print(center)\n    ",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:41+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=407",
+                "$$hashKey": "object:216735"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=408",
+                "$$hashKey": "object:216736"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=409",
+                "$$hashKey": "object:216737"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=410",
+                "$$hashKey": "object:216738"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=411",
+                "$$hashKey": "object:216739"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=412",
+                "$$hashKey": "object:216740"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=413",
+                "$$hashKey": "object:216741"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=414",
+                "$$hashKey": "object:216742"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=415",
+                "$$hashKey": "object:216743"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=416",
+                "$$hashKey": "object:216744"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=417",
+                "$$hashKey": "object:216745"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=418",
+                "$$hashKey": "object:216746"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225376_1266345923",
+        "id": "20161129-014411_927055504",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:41+0000",
+        "dateFinished": "2020-11-30T11:54:43+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215130"
+      },
+      {
+        "text": "%md\n\n# Cross-Validation\n",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:45+0000",
+        "config": {
+          "tableHide": false,
+          "editorSetting": {
+            "language": "markdown",
+            "editOnDblClick": true,
+            "completionSupport": false
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/markdown",
+          "fontSize": 9,
+          "editorHide": true,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225377_-1634488551",
+        "id": "20161129-014829_2105425566",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:45+0000",
+        "dateFinished": "2020-11-30T11:54:45+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215131"
+      },
+      {
+        "text": "%pyspark\n\nfrom pyspark.ml import Pipeline\nfrom pyspark.ml.classification import LogisticRegression\nfrom pyspark.ml.evaluation import BinaryClassificationEvaluator\nfrom pyspark.ml.feature import HashingTF, Tokenizer\nfrom pyspark.ml.tuning import CrossValidator, ParamGridBuilder\n\n# Prepare training documents, which are labeled.\ntraining = spark.createDataFrame([\n    (0, \"a b c d e spark\", 1.0),\n    (1, \"b d\", 0.0),\n    (2, \"spark f g h\", 1.0),\n    (3, \"hadoop mapreduce\", 0.0),\n    (4, \"b spark who\", 1.0),\n    (5, \"g d a y\", 0.0),\n    (6, \"spark fly\", 1.0),\n    (7, \"was mapreduce\", 0.0),\n    (8, \"e spark program\", 1.0),\n    (9, \"a e c l\", 0.0),\n    (10, \"spark compile\", 1.0),\n    (11, \"hadoop software\", 0.0)\n], [\"id\", \"text\", \"label\"])\n\n# Configure an ML pipeline, which consists of tree stages: tokenizer, hashingTF, and lr.\ntokenizer = Tokenizer(inputCol=\"text\", outputCol=\"words\")\nhashingTF = HashingTF(inputCol=tokenizer.getOutputCol(), outputCol=\"features\")\nlr = LogisticRegression(maxIter=10)\npipeline = Pipeline(stages=[tokenizer, hashingTF, lr])\n\n# We now treat the Pipeline as an Estimator, wrapping it in a CrossValidator instance.\n# This will allow us to jointly choose parameters for all Pipeline stages.\n# A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.\n# We use a ParamGridBuilder to construct a grid of parameters to search over.\n# With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,\n# this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.\nparamGrid = ParamGridBuilder() \\\n    .addGrid(hashingTF.numFeatures, [10, 100, 1000]) \\\n    .addGrid(lr.regParam, [0.1, 0.01]) \\\n    .build()\n\ncrossval = CrossValidator(estimator=pipeline,\n                          estimatorParamMaps=paramGrid,\n                          evaluator=BinaryClassificationEvaluator(),\n                          numFolds=2)  # use 3+ folds in practice\n\n# Run cross-validation, and choose the best set of parameters.\ncvModel = crossval.fit(training)\n\n# Prepare test documents, which are unlabeled.\ntest = spark.createDataFrame([\n    (4, \"spark i j k\"),\n    (5, \"l m n\"),\n    (6, \"mapreduce spark\"),\n    (7, \"apache hadoop\")\n], [\"id\", \"text\"])\n\n# Make predictions on test documents. cvModel uses the best model found (lrModel).\nprediction = cvModel.transform(test)\nselected = prediction.select(\"id\", \"text\", \"probability\", \"prediction\")\nfor row in selected.collect():\n    print(row)",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:54:47+0000",
+        "config": {
+          "editorSetting": {
+            "language": "python",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/python",
+          "fontSize": 9,
+          "results": [
+            {
+              "graph": {
+                "mode": "table",
+                "height": 300,
+                "optionOpen": false,
+                "keys": [],
+                "values": [],
+                "groups": [],
+                "scatter": {}
+              }
+            }
+          ],
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {
+          "jobUrl": {
+            "propertyName": "jobUrl",
+            "label": "SPARK JOB",
+            "tooltip": "View in Spark web UI",
+            "group": "spark",
+            "values": [
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=419",
+                "$$hashKey": "object:216878"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=420",
+                "$$hashKey": "object:216879"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=421",
+                "$$hashKey": "object:216880"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=422",
+                "$$hashKey": "object:216881"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=423",
+                "$$hashKey": "object:216882"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=424",
+                "$$hashKey": "object:216883"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=425",
+                "$$hashKey": "object:216884"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=426",
+                "$$hashKey": "object:216885"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=427",
+                "$$hashKey": "object:216886"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=428",
+                "$$hashKey": "object:216887"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=429",
+                "$$hashKey": "object:216888"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=430",
+                "$$hashKey": "object:216889"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=431",
+                "$$hashKey": "object:216890"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=432",
+                "$$hashKey": "object:216891"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=433",
+                "$$hashKey": "object:216892"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=434",
+                "$$hashKey": "object:216893"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=435",
+                "$$hashKey": "object:216894"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=436",
+                "$$hashKey": "object:216895"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=437",
+                "$$hashKey": "object:216896"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=438",
+                "$$hashKey": "object:216897"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=439",
+                "$$hashKey": "object:216898"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=440",
+                "$$hashKey": "object:216899"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=441",
+                "$$hashKey": "object:216900"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=442",
+                "$$hashKey": "object:216901"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=443",
+                "$$hashKey": "object:216902"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=444",
+                "$$hashKey": "object:216903"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=445",
+                "$$hashKey": "object:216904"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=446",
+                "$$hashKey": "object:216905"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=447",
+                "$$hashKey": "object:216906"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=448",
+                "$$hashKey": "object:216907"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=449",
+                "$$hashKey": "object:216908"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=450",
+                "$$hashKey": "object:216909"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=451",
+                "$$hashKey": "object:216910"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=452",
+                "$$hashKey": "object:216911"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=453",
+                "$$hashKey": "object:216912"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=454",
+                "$$hashKey": "object:216913"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=455",
+                "$$hashKey": "object:216914"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=456",
+                "$$hashKey": "object:216915"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=457",
+                "$$hashKey": "object:216916"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=458",
+                "$$hashKey": "object:216917"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=459",
+                "$$hashKey": "object:216918"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=460",
+                "$$hashKey": "object:216919"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=461",
+                "$$hashKey": "object:216920"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=462",
+                "$$hashKey": "object:216921"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=463",
+                "$$hashKey": "object:216922"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=464",
+                "$$hashKey": "object:216923"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=465",
+                "$$hashKey": "object:216924"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=466",
+                "$$hashKey": "object:216925"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=467",
+                "$$hashKey": "object:216926"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=468",
+                "$$hashKey": "object:216927"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=469",
+                "$$hashKey": "object:216928"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=470",
+                "$$hashKey": "object:216929"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=471",
+                "$$hashKey": "object:216930"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=472",
+                "$$hashKey": "object:216931"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=473",
+                "$$hashKey": "object:216932"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=474",
+                "$$hashKey": "object:216933"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=475",
+                "$$hashKey": "object:216934"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=476",
+                "$$hashKey": "object:216935"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=477",
+                "$$hashKey": "object:216936"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=478",
+                "$$hashKey": "object:216937"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=479",
+                "$$hashKey": "object:216938"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=480",
+                "$$hashKey": "object:216939"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=481",
+                "$$hashKey": "object:216940"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=482",
+                "$$hashKey": "object:216941"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=483",
+                "$$hashKey": "object:216942"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=484",
+                "$$hashKey": "object:216943"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=485",
+                "$$hashKey": "object:216944"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=486",
+                "$$hashKey": "object:216945"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=487",
+                "$$hashKey": "object:216946"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=488",
+                "$$hashKey": "object:216947"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=489",
+                "$$hashKey": "object:216948"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=490",
+                "$$hashKey": "object:216949"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=491",
+                "$$hashKey": "object:216950"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=492",
+                "$$hashKey": "object:216951"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=493",
+                "$$hashKey": "object:216952"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=494",
+                "$$hashKey": "object:216953"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=495",
+                "$$hashKey": "object:216954"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=496",
+                "$$hashKey": "object:216955"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=497",
+                "$$hashKey": "object:216956"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=498",
+                "$$hashKey": "object:216957"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=499",
+                "$$hashKey": "object:216958"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=500",
+                "$$hashKey": "object:216959"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=501",
+                "$$hashKey": "object:216960"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=502",
+                "$$hashKey": "object:216961"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=503",
+                "$$hashKey": "object:216962"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=504",
+                "$$hashKey": "object:216963"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=505",
+                "$$hashKey": "object:216964"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=506",
+                "$$hashKey": "object:216965"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=507",
+                "$$hashKey": "object:216966"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=508",
+                "$$hashKey": "object:216967"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=509",
+                "$$hashKey": "object:216968"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=510",
+                "$$hashKey": "object:216969"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=511",
+                "$$hashKey": "object:216970"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=512",
+                "$$hashKey": "object:216971"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=513",
+                "$$hashKey": "object:216972"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=514",
+                "$$hashKey": "object:216973"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=515",
+                "$$hashKey": "object:216974"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=516",
+                "$$hashKey": "object:216975"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=517",
+                "$$hashKey": "object:216976"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=518",
+                "$$hashKey": "object:216977"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=519",
+                "$$hashKey": "object:216978"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=520",
+                "$$hashKey": "object:216979"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=521",
+                "$$hashKey": "object:216980"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=522",
+                "$$hashKey": "object:216981"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=523",
+                "$$hashKey": "object:216982"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=524",
+                "$$hashKey": "object:216983"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=525",
+                "$$hashKey": "object:216984"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=526",
+                "$$hashKey": "object:216985"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=527",
+                "$$hashKey": "object:216986"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=528",
+                "$$hashKey": "object:216987"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=529",
+                "$$hashKey": "object:216988"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=530",
+                "$$hashKey": "object:216989"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=531",
+                "$$hashKey": "object:216990"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=532",
+                "$$hashKey": "object:216991"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=533",
+                "$$hashKey": "object:216992"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=534",
+                "$$hashKey": "object:216993"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=535",
+                "$$hashKey": "object:216994"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=536",
+                "$$hashKey": "object:216995"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=537",
+                "$$hashKey": "object:216996"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=538",
+                "$$hashKey": "object:216997"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=539",
+                "$$hashKey": "object:216998"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=540",
+                "$$hashKey": "object:216999"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=541",
+                "$$hashKey": "object:217000"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=542",
+                "$$hashKey": "object:217001"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=543",
+                "$$hashKey": "object:217002"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=544",
+                "$$hashKey": "object:217003"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=545",
+                "$$hashKey": "object:217004"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=546",
+                "$$hashKey": "object:217005"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=547",
+                "$$hashKey": "object:217006"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=548",
+                "$$hashKey": "object:217007"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=549",
+                "$$hashKey": "object:217008"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=550",
+                "$$hashKey": "object:217009"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=551",
+                "$$hashKey": "object:217010"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=552",
+                "$$hashKey": "object:217011"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=553",
+                "$$hashKey": "object:217012"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=554",
+                "$$hashKey": "object:217013"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=555",
+                "$$hashKey": "object:217014"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=556",
+                "$$hashKey": "object:217015"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=557",
+                "$$hashKey": "object:217016"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=558",
+                "$$hashKey": "object:217017"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=559",
+                "$$hashKey": "object:217018"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=560",
+                "$$hashKey": "object:217019"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=561",
+                "$$hashKey": "object:217020"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=562",
+                "$$hashKey": "object:217021"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=563",
+                "$$hashKey": "object:217022"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=564",
+                "$$hashKey": "object:217023"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=565",
+                "$$hashKey": "object:217024"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=566",
+                "$$hashKey": "object:217025"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=567",
+                "$$hashKey": "object:217026"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=568",
+                "$$hashKey": "object:217027"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=569",
+                "$$hashKey": "object:217028"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=570",
+                "$$hashKey": "object:217029"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=571",
+                "$$hashKey": "object:217030"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=572",
+                "$$hashKey": "object:217031"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=573",
+                "$$hashKey": "object:217032"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=574",
+                "$$hashKey": "object:217033"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=575",
+                "$$hashKey": "object:217034"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=576",
+                "$$hashKey": "object:217035"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=577",
+                "$$hashKey": "object:217036"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=578",
+                "$$hashKey": "object:217037"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=579",
+                "$$hashKey": "object:217038"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=580",
+                "$$hashKey": "object:217039"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=581",
+                "$$hashKey": "object:217040"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=582",
+                "$$hashKey": "object:217041"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=583",
+                "$$hashKey": "object:217042"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=584",
+                "$$hashKey": "object:217043"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=585",
+                "$$hashKey": "object:217044"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=586",
+                "$$hashKey": "object:217045"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=587",
+                "$$hashKey": "object:217046"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=588",
+                "$$hashKey": "object:217047"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=589",
+                "$$hashKey": "object:217048"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=590",
+                "$$hashKey": "object:217049"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=591",
+                "$$hashKey": "object:217050"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=592",
+                "$$hashKey": "object:217051"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=593",
+                "$$hashKey": "object:217052"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=594",
+                "$$hashKey": "object:217053"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=595",
+                "$$hashKey": "object:217054"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=596",
+                "$$hashKey": "object:217055"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=597",
+                "$$hashKey": "object:217056"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=598",
+                "$$hashKey": "object:217057"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=599",
+                "$$hashKey": "object:217058"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=600",
+                "$$hashKey": "object:217059"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=601",
+                "$$hashKey": "object:217060"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=602",
+                "$$hashKey": "object:217061"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=603",
+                "$$hashKey": "object:217062"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=604",
+                "$$hashKey": "object:217063"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=605",
+                "$$hashKey": "object:217064"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=606",
+                "$$hashKey": "object:217065"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=607",
+                "$$hashKey": "object:217066"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=608",
+                "$$hashKey": "object:217067"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=609",
+                "$$hashKey": "object:217068"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=610",
+                "$$hashKey": "object:217069"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=611",
+                "$$hashKey": "object:217070"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=612",
+                "$$hashKey": "object:217071"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=613",
+                "$$hashKey": "object:217072"
+              },
+              {
+                "jobUrl": "http://85328979ee2d:4040/jobs/job?id=614",
+                "$$hashKey": "object:217073"
+              }
+            ],
+            "interpreterSettingId": "spark"
+          }
+        },
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225377_-1942912182",
+        "id": "20161129-015223_1699705288",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "dateStarted": "2020-11-30T11:54:47+0000",
+        "dateFinished": "2020-11-30T11:54:59+0000",
+        "status": "FINISHED",
+        "$$hashKey": "object:215132"
+      },
+      {
+        "text": "",
+        "user": "anonymous",
+        "dateUpdated": "2020-11-30T11:37:05+0000",
+        "config": {
+          "editorSetting": {
+            "language": "scala",
+            "editOnDblClick": false,
+            "completionKey": "TAB",
+            "completionSupport": true
+          },
+          "colWidth": 12,
+          "editorMode": "ace/mode/scala",
+          "fontSize": 9,
+          "results": {},
+          "graph": {
+            "mode": "table",
+            "height": 300,
+            "optionOpen": false,
+            "keys": [],
+            "values": [],
+            "groups": [],
+            "scatter": {}
+          },
+          "enabled": true
+        },
+        "settings": {
+          "params": {},
+          "forms": {}
+        },
+        "apps": [],
+        "runtimeInfos": {},
+        "progressUpdateIntervalMs": 500,
+        "jobName": "paragraph_1606736225377_2018641965",
+        "id": "20161129-015302_1115287316",
+        "dateCreated": "2020-11-30T11:37:05+0000",
+        "status": "READY",
+        "$$hashKey": "object:215133"
+      }
+    ],
+    "name": "MLlib-Lab-Session",
+    "id": "2FTV3ZMB8",
+    "defaultInterpreterGroup": "spark",
+    "version": "0.9.0-preview1",
+    "noteParams": {},
+    "noteForms": {},
+    "angularObjects": {},
+    "config": {
+      "isZeppelinNotebookCronEnable": false,
+      "looknfeel": "default",
+      "personalizedMode": "false"
+    },
+    "info": {},
+    "path": "/MLlib-Lab-Session"
+  }

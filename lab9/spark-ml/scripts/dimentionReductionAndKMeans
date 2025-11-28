@@ -1,0 +1,30 @@
+%spark.pyspark
+from pyspark.mllib.linalg import Vectors
+from pyspark.mllib.linalg.distributed import RowMatrix
+from pyspark.mllib.clustering import KMeans
+from pyspark.mllib.linalg import DenseVector
+
+# Load and parse the data
+data = sc.textFile("/opt/resources/dim_reduction_data.txt")
+parsedData = data.map(lambda line: Vectors.dense([float(x) for x in line.split(' ')]))
+
+# Create a RowMatrix from the parsed data
+mat = RowMatrix(parsedData)
+
+# Compute the top 2 principal components
+pc = mat.computePrincipalComponents(2)  # Reduce to 2 dimensions
+
+# Project the data to the lower-dimensional space
+projected = mat.multiply(pc).rows
+
+# Train a k-means model on the projected data
+model = KMeans.train(projected, k=2, maxIterations=20, initializationMode="k-means||")
+
+# Print the cluster centers in the reduced space
+print("Cluster Centers (Reduced Dimensions):")
+for center in model.clusterCenters:
+    print(center)
+
+# Evaluate clustering by computing the cost (sum of squared distances)
+cost = model.computeCost(projected)
+print(f"Sum of Squared Distances to Cluster Centers: {cost}")

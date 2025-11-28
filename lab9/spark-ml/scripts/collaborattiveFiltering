@@ -1,0 +1,36 @@
+%spark.pyspark
+
+#importing the required pyspark library 
+from pyspark.sql import SparkSession 
+from pyspark.ml.evaluation import RegressionEvaluator 
+from pyspark.ml.recommendation import ALS 
+  
+#Setup Spark Session 
+spark = SparkSession.builder.appName('Recommender').getOrCreate() 
+spark
+
+#CSV file can be downloaded from the link mentioned above. 
+data = spark.read.csv('/opt/resources/book_ratings.csv',inferSchema=True,header=True) 
+data.show(5)
+
+data.describe().show()
+
+# Dividing the data using random split into train_data and test_data  
+# in 80% and 20% respectively 
+train_data, test_data = data.randomSplit([0.8, 0.2])
+
+# Build the recommendation model using ALS on the training data 
+als = ALS(maxIter=5, 
+          regParam=0.01, 
+          userCol="user_id", 
+          itemCol="book_id", 
+          ratingCol="rating") 
+  
+#Fitting the model on the train_data 
+model = als.fit(train_data)
+
+# Evaluate the model by computing the RMSE on the test data 
+predictions = model.transform(test_data) 
+  
+#Displaying predictions calculated by the model 
+predictions.show()

@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  namenode:
+    image: apache/zeppelin:0.9.0
+    container_name: zeppelin
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 8089:8080
+    volumes:
+      - /home/iitgcpuser/iit/lab9/spark-ml/resources:/opt/resources
+      - /home/iitgcpuser/iit/lab9/spark-ml/scripts:/opt/scripts
