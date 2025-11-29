@@ -1,0 +1,40 @@
+%spark.pyspark
+
+from pyspark.sql import SQLContext
+from pyspark.ml.feature import StringIndexer
+from pyspark.ml.linalg import Vectors
+from pyspark.ml.classification import LinearSVC  # Corrected import
+from pyspark.ml import Pipeline
+from pyspark.sql.functions import col
+
+# Load the data into a DataFrame (assuming the table was already created in previous steps)
+df = sqlc.sql("SELECT age, balance, job FROM bank")
+
+# Convert 'job' (categorical variable) to numeric using StringIndexer
+indexer = StringIndexer(inputCol="job", outputCol="jobIndex")
+
+# Combine 'age', 'balance', and 'jobIndex' into a feature vector
+from pyspark.ml.feature import VectorAssembler
+assembler = VectorAssembler(inputCols=["age", "balance", "jobIndex"], outputCol="features")
+
+# Optionally, you can create labels for your classification problem (here using a dummy label, e.g., based on age)
+# For simplicity, we will create a binary label based on age (e.g., age > 30 is label 1, else 0)
+df = df.withColumn("label", (col("age") > 30).cast("double"))
+
+# Apply the transformations
+pipeline = Pipeline(stages=[indexer, assembler])
+model = pipeline.fit(df)
+df_transformed = model.transform(df)
+
+# Split the data into training and test sets (80% training, 20% test)
+train_data, test_data = df_transformed.randomSplit([0.8, 0.2], seed=1234)
+
+# Train an SVM model on the transformed data (using LinearSVC)
+svm = LinearSVC(maxIter=100, regParam=0.1, labelCol="label", featuresCol="features")
+svm_model = svm.fit(train_data)
+
+# Evaluate the model on test data
+predictions = svm_model.transform(test_data)
+
+# Show predictions and accuracy
+predictions.select("age", "balance", "job", "label", "prediction").show()

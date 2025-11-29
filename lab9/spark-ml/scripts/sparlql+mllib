@@ -1,0 +1,20 @@
+%spark.pyspark
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.getOrCreate()
+
+# Load the dataset (Spark can directly read CSV with header)
+bankdf = spark.read.csv("/opt/resources/bank-full.csv",
+                        header=True,
+                        inferSchema=True,
+                        sep=";")
+
+# Show schema to confirm correct loading
+bankdf.printSchema()
+
+# Register as SQL table
+bankdf.createOrReplaceTempView("bank")
+
+# Preview
+spark.sql("SELECT * FROM bank LIMIT 5").show()
