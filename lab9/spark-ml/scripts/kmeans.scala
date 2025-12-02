@@ -1,20 +1,16 @@
-%spark.pyspark
+%spark
 
-from pyspark.mllib.clustering import KMeans
-from pyspark.mllib.linalg import Vectors
-from math import sqrt
+import org.apache.spark.mllib.clustering.KMeans
+import org.apache.spark.mllib.linalg.Vectors
 
-# Load and parse the data
-data = sc.textFile("/opt/resources/kmeans_data.txt")
-parsedData = data.map(lambda line: Vectors.dense([float(x) for x in line.split(' ')])).cache()
-
-# Build the model (cluster the data)
-clusters = KMeans.train(parsedData, 2, maxIterations=10, runs=1, initializationMode="k-means||")
-
-# Evaluate clustering by computing the sum of squared errors
-def error(point):
-    center = clusters.centers[clusters.predict(point)]
-    return sqrt(sum([(x - y) ** 2 for x, y in zip(point, center)]))
-
-cost = parsedData.map(lambda point: error(point)).reduce(lambda x, y: x + y)
-print("Sum of squared error = " + str(cost))
+// Load and parse the data.
+val data = sc.textFile("/opt/resources/kmeans_data.txt")
+val parsedData = data.map(line => Vectors.dense(line.split(' ').map(_.toDouble))).cache()
+println(parsedData)
+// Cluster the data into two classes using KMeans.
+val clusters = KMeans.train(parsedData, 2, 10, 1, initializationMode = "k-means||")
+// val clusters = KMeans.train(parsedData, 2, 20)
+// Compute the sum of squared errors.
+val cost = clusters.computeCost(parsedData)
+// Compute the sum of squared errors.
+println("Sum of squared errors = " + cost)
